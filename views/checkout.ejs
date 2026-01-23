@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Checkout</title>
+        <link rel="stylesheet" href="/css/checkout.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    </head>
+        <body>
+
+            <header>
+                <!-- LOGO -->
+                <a href="/#welcome" class="logo">
+                    <img src="../../Photos/Emcel logo backround removed.png" height="50" alt="">
+                </a>
+
+                <!-- HAMBURGER (RIGHT SIDE) -->
+                <div id="menuToggle" class="menu-toggle">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+
+                <!-- NAV -->
+                <nav id="mainNav">
+                    <ul>
+                    <li><a href="/#welcome">Home</a></li>
+                    <li><a href="/#aboutus">About Us</a></li>
+                    <li><a href="/#products">Products</a></li>
+                    <li><a href="/#contacts">Contact</a></li>
+                    </ul>
+                </nav>
+            </header>
+
+
+            <div class="checkout-container">
+                <div class="checkout-content">
+
+                    <!-- ✅ FORM START -->
+                    <form id="checkoutForm">
+
+                        <div class="checkout1">
+                            <div class="contact-container">
+                                <p>Contact</p>
+                                <input type="text" name="contact" placeholder="Email or mobile phone number" required>
+                            </div>
+
+                            <div class="delivery-container">
+                                <p>Delivery</p>
+                                <input class="country-input" type="text" name="country" value="Philippines" readonly>
+
+                                <div class="fnamelname-container">
+                                    <input type="text" name="firstname" placeholder="First name" required>
+                                    <input type="text" name="lastname" placeholder="Last name" required>
+                                </div>
+
+                                <input class="company-input" type="text" name="company" placeholder="Company (optional)">
+                                <input class="address-input" type="text" name="address" placeholder="Address" required>
+                                <input class="apartment-input" type="text" name="apartment" placeholder="Apartment, suite, etc. (optional)">
+
+                                <div class="postalCity-container">
+                                    <input type="text" name="postal" placeholder="Postal code" required>
+                                    <input type="text" name="city" placeholder="City" required>
+                                </div>
+
+                                <select id="region" name="region" required>
+                                    <option disabled selected>Select Region</option>
+                                    <option value="NCR">NCR (National Capital Region)</option>
+                                    <option value="Region I">Region I – Ilocos Region</option>
+                                    <option value="Region II">Region II – Cagayan Valley</option>
+                                    <option value="Region III">Region III – Central Luzon</option>
+                                    <option value="Region IV-A">Region IV-A – Calabarzon</option>
+                                    <option value="Region IV-B">Region IV-B – Mimaropa</option>
+                                    <option value="Region V">Region V – Bicol Region</option>
+                                    <option value="Region VI">Region VI – Western Visayas</option>
+                                    <option value="Region VII">Region VII – Central Visayas</option>
+                                    <option value="Region VIII">Region VIII – Eastern Visayas</option>
+                                    <option value="Region IX">Region IX – Zamboanga Peninsula</option>
+                                    <option value="Region X">Region X – Northern Mindanao</option>
+                                    <option value="Region XI">Region XI – Davao Region</option>
+                                    <option value="Region XII">Region XII – Soccsksargen</option>
+                                    <option value="Region XIII">Region XIII – Caraga</option>
+                                    <option value="BARMM">BARMM – Bangsamoro Autonomous Region</option>
+                                    <option value="CAR">CAR – Cordillera Administrative Region</option>
+                                </select>
+
+                                <input class="phone-input" type="text" name="phone" placeholder="Phone" required>
+
+                            </div>
+
+                            <p class="payment-text">Payment</p>
+                            <p class="payment-sentence">All transactions are secure and encrypted.</p>
+
+                            <div class="payment-content">
+                                <label class="payment-optionc">
+                                    <input type="radio" name="payment" value="COD" required>
+                                    Cash on Delivery
+                                </label>
+
+                                <label class="payment-option">
+                                    <input type="radio" name="payment" value="Gcash">
+                                    Gcash
+                                </label>
+
+                                <label class="payment-option">
+                                    <input type="radio" name="payment" value="Maya">
+                                    Maya
+                                </label>
+
+                                <label class="payment-option">
+                                    <input type="radio" name="payment" value="Bank Account">
+                                    Bank Account
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="checkout2">
+                            <div class="payment-methods">
+                                <div class="order-container">
+                                    <p class="order-text">Order summary</p>
+
+                                    <div class="order-content">
+                                    <% cartItems.forEach(item => { %>
+                                        <div class="imageNameTotal-container">
+                                            <img
+                                            src="<%= item.image %>"
+                                            class="product-image"
+                                            alt="<%= item.name %>"
+                                            >
+
+                                            <p class="product-name"><%= item.name %></p>
+                                            <p class="product-value">₱<%= item.price.toLocaleString() %></p>
+                                        </div>
+
+                                        <div class="kilograms-container">
+                                            <p class="product-kilograms-text">Kilograms</p>
+                                            <p class="product-kilograms"><%= item.kilograms || '' %></p>
+                                        </div>
+
+                                        <div class="subtotal-container">
+                                            <p class="product-subtotal-text">Subtotal</p>
+                                            <p class="product-subtotal">
+                                            ₱<%= (item.price * item.quantity).toLocaleString() %>
+                                            </p>
+                                        </div>
+                                        <% }) %>
+
+
+                                        <div class="total-container">
+                                            <p class="product-total-text">Total</p>
+                                            <p class="product-total">₱<%= total.toLocaleString() %></p>
+                                        </div>
+
+                                        <button type="submit" id="checkoutBtn">Complete order</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                    <!-- ✅ FORM END -->
+
+                </div>
+            </div>
+
+            <!-- Toast Notification -->
+<div id="toast"></div>
+
+        <script src="/js/checkout.js"></script>
+        </body>
+    </html>

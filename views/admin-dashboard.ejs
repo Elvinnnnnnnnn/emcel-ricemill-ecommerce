@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emcel RiceMill Dashboard</title>
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+    <body>
+        <div class="dashboard">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <img src="../../Photos/Emcel logo backround removed.png" alt="Emcel Logo">
+                <ul>
+                    <li><a href="#">Overview</a></li>
+                    <li><a href="#inventory">Inventory</a></li>
+                    <li><a href="#orders">Orders</a></li>
+                    <li><a href="#sales">Sales</a></li>
+                    <li><a href="#users">Users</a></li>
+                    <li><a href="#" id="openSettings">Settings</a></li>
+                </ul>
+
+            </nav>
+            
+            <!-- Main Content -->
+            <main class="main-content">
+                <header class="header">
+                    <div>
+                        <h3>Welcome to Emcel Ricemill</h3>
+                        <h1>Dashboard</h1>
+                    </div>
+                   <div class="user-info">
+                        <span>Name: <%= admin.display_name %></span>
+                        <a href="/admin/logout" class="logout-btn">Logout</a>
+                    </div>
+
+                </header>
+                
+                <section class="metrics">
+                    <div class="card">
+                        <h3>Total Sales</h3>
+                        <p>₱<%= Number(totalSales).toLocaleString() %></p>
+                    </div>
+                    <div class="card">
+                        <h3>Active Users</h3>
+                         <p><%= activeUsers %></p>
+                    </div>
+                    <div class="card">
+                        <h3>Revenue</h3>
+                        <p>₱<%= Number(revenue).toLocaleString() %></p>
+                    </div>
+                  <div class="card" onclick="location.href='#orders'" style="cursor:pointer;">
+                    <h3>Pending Orders</h3>
+                    <p><%= pendingOrdersCount || 0 %></p>
+                  </div>
+
+                </section>
+                
+                <!-- Inventory Monitoring (Kept Original + Added Product Management) -->
+                <section id="inventory" class="section">
+                    <h2>Inventory Monitoring</h2>
+
+                    <div class="inventory-scroll">
+                        <table class="inventory-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% inventory.forEach(item => { %>
+                                    <tr>
+                                        <td>
+                                            <%= item.productName %> (<%= item.kilograms %>kg)
+                                        </td>
+                                        <td><%= item.stock %></td>
+                                        <td class="status <%= item.status %>">
+                                            <%= item.status.replace('-', ' ').toUpperCase() %>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+
+
+
+                    <h2>Product Management</h2>
+
+                    <!-- Add Product Form -->
+                    <div class="add-product">
+                        <h3>Add New Product</h3>
+                            <form id="addProductForm" action="/admin/add-product" method="POST" enctype="multipart/form-data">
+                                <input type="text" name="name" placeholder="Product Name" required>
+                                <textarea name="description" placeholder="Description"></textarea>
+                                <input type="file" name="image" accept="image/*"> <br>
+                                <h4>Variants</h4> <br>
+                                <input type="number" name="stock[]" placeholder="Stock" required>
+                                <input class="price-input" type="number" name="price[]" placeholder="Price" required>
+                                <input class="kilograms-input" type="text" name="kilograms[]" placeholder="Kilograms (e.g. 25kg)" required> <br>
+                                <button type="button" id="add-variant-btn">Add Another Variant</button>
+                                <button type="submit" class="add-btn">Add Product</button>
+                            </form>
+                    </div>
+
+                    <!-- Product List -->
+                   <h3 style="margin-top: 30px;">Product List</h3>
+
+                        <div class="product-scroll">
+                            <table class="product-table">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Kilograms</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productList">
+                                    <% products.forEach(product => { %>
+                                        <tr data-id="<%= product.id %>">
+                                            <td>
+                                                <img src="/product_photos/<%= product.image %>" 
+                                                    alt="<%= product.name %>" 
+                                                    class="product-image">
+                                            </td>
+                                            <td><%= product.name %></td>
+                                            <td>
+                                                <% product.prices.split(',').forEach((price, index) => { %>
+                                                    ₱<%= price.trim() %><%= (index < product.prices.split(',').length - 1) ? ', ' : '' %>
+                                                <% }) %>
+                                            </td>
+                                            <td><%= product.kilograms %>kg</td>
+                                            <td>
+                                                <button class="edit-btn">Edit</button>
+                                                <button class="delete-btn">Delete</button>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+
+                </section>
+
+                <!-- Edit Product Modal -->
+                <div id="editModal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <span id="closeModal" class="close">&times;</span>
+
+                        <h3>Edit Product Variants</h3>
+
+                        <form id="editProductForm" enctype="multipart/form-data">
+                            <!-- Product Name -->
+                            <label for="productName">Product Name</label>
+                            <input id="productName" type="text" name="name" placeholder="Product Name" required>
+
+                            <!-- Container for dynamic variant inputs -->
+                            <div class="variants-wrapper">
+                                <div id="variantInputs"></div>
+                            </div>
+
+
+                            <!-- Optional image update -->
+                            <label for="productImage">Update Image (optional)</label>
+                            <input id="productImage" type="file" name="image" accept="image/*">
+
+                            <button type="submit">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+
+                
+                <!-- Order Handling -->
+                <section id="orders" class="section">
+                    <h2>Order Handling</h2>
+                    <div class="order-list">
+                        <% pendingOrders.forEach(order => { %>
+                            <div class="order-item">
+                            <p>
+                                Order #<%= order.orderId %> -
+                                <%= order.firstname %> <%= order.lastname %> -
+                                <strong><%= order.status.toUpperCase() %></strong>
+                            </p>
+
+                            <!-- APPROVE -->
+                            <% if (order.status === 'pending') { %>
+                                <form action="/admin/order/approve/<%= order.orderId %>" method="POST">
+                                    <button class="approve-btn">Approve</button>
+                                </form>
+                            <% } %>
+
+                            <!-- OUT FOR DELIVERY -->
+                            <% if (order.status === 'processing') { %>
+                                <form action="/admin/order/out-for-delivery/<%= order.orderId %>" method="POST">
+                                    <button class="edit-btn">Out for Delivery</button>
+                                </form>
+                            <% } %>
+
+                            <!-- DELIVERED -->
+                            <% if (order.status === 'out_for_delivery') { %>
+                                <form action="/admin/order/delivered/<%= order.orderId %>" method="POST"
+                                    onsubmit="return confirm('Confirm this order is delivered?');">
+                                    <button class="approve-btn">Mark as Delivered</button>
+                                </form>
+                            <% } %>
+
+                            <!-- CANCEL -->
+                            <form action="/admin/order/reject/<%= order.orderId %>" method="POST">
+                                <button class="reject-btn">Cancel</button>
+                            </form>
+                        </div>
+
+                        <% }) %>
+                    </div>
+                </section>
+
+
+                <!-- Order Tracking -->
+                <section class="section">
+                    <h2>Order Tracking</h2>
+
+                        <div class="tracking-scroll">
+                            <div class="tracking-list">
+                                <% allOrders.forEach(order => { %>
+                                    <div class="tracking-item">
+                                        <p>Order #<%= order.orderId %> - <%= order.firstname %> <%= order.lastname %></p>
+                                        <div class="progress-bar">
+                                            <% let progressWidth = 0; let statusText = ''; %>
+                                            <% if(order.status === 'pending'){ progressWidth = 25; statusText = 'Pending'; } %>
+                                            <% if(order.status === 'processing'){ progressWidth = 50; statusText = 'Processing'; } %>
+                                            <% if(order.status === 'out_for_delivery'){ progressWidth = 75; statusText = 'Out for Delivery'; } %>
+                                            <% if(order.status === 'delivered'){ progressWidth = 100; statusText = 'Delivered'; } %>
+                                            <div class="progress" style="width: <%= progressWidth %>%;"><%= statusText %></div>
+                                        </div>
+
+                                        <form action="/admin/order/delete/<%= order.orderId %>" 
+                                            method="POST"
+                                            class="delete-order-form"
+                                            onsubmit="return confirm('Are you sure you want to delete this order?');">
+                                            <button type="submit" class="delete-order-btn">
+                                                Delete
+                                            </button>
+                                        </form>
+
+
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+
+                </section>
+
+                
+                <!-- Sales Tracking -->
+                <section id="sales" class="section">
+                    <h2>Sales Tracking</h2>
+
+                    <div class="chart-wrapper">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+
+                    <div class="sales-metrics">
+                        <p>Top Product: <%= topProduct.name %> - ₱<%= Number(topProduct.totalSales).toLocaleString() %></p>
+                        <p>Monthly Growth: <%= monthlyGrowth %>%</p>
+                    </div>
+                </section>
+
+               <!-- User Account Management -->
+                <section id="users" class="section">
+                    <h2>User Account Management</h2>
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user => { %>
+                                <tr data-id="<%= user.id %>">
+                                    <td><%= user.firstname %> <%= user.lastname %></td>
+                                    <td><%= user.email %></td>
+                                    <td>
+                                        <button class="edit-user-btn">Edit</button>
+                                        <button class="delete-user-btn">Delete</button>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Edit User Modal -->
+                <div id="editUserModal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h3>Edit User</h3>
+                        <form id="editUserForm">
+                            <input type="hidden" name="id" id="editUserId">
+
+                            <div class="form-group">
+                                <label for="editFirstname">First Name</label>
+                                <input type="text" name="firstname" id="editFirstname" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editLastname">Last Name</label>
+                                <input type="text" name="lastname" id="editLastname" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editEmail">Email</label>
+                                <input type="email" name="email" id="editEmail" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="editPassword">Password <small>(leave blank to keep current)</small></label>
+                                <input type="password" name="password" id="editPassword" placeholder="New Password">
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="submit" class="save-btn">Save</button>
+                                <button type="button" class="cancel-btn">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- SETTINGS SIDEBAR -->
+                <!-- Sidebar -->
+                <div id="settingsSidebar" class="settings-sidebar">
+                    <div class="settings-header">
+                        <h3>Settings</h3>
+                        <span id="closeSettings">&times;</span>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Display Name</label>
+                        <input type="text" id="adminDisplayName" name="displayName" value="<%= admin.display_name %>">
+                    </div>
+                    <div class="setting-item">
+                        <label>Password</label>
+                        <input type="password" id="adminPassword" name="password" placeholder="New Password">
+                    </div>
+                    <div class="setting-item">
+                        <button id="saveAdminSettings">Save Settings</button>
+                    </div>
+                </div>
+
+                <!-- Overlay (moved outside sidebar) -->
+                <div id="settingsOverlay" class="settings-overlay"></div>
+
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+        
+    </body>
+
+    <script id="monthly-revenue-data" type="application/json"><%- JSON.stringify(monthlyRevenue || []) %></script>
+    <script src="/js/dashboard.js"></script>
+
+</html>
+

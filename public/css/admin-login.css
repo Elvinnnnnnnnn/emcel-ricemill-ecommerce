@@ -1,0 +1,82 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #FAF8F1 url("../Photos/WelcomePageBackroundPhoto2.png") center/cover no-repeat fixed;
+  font-family: 'Poppins';
+}
+
+.login-container{
+    text-align: center;
+    margin-top: 180px;
+}
+
+.login-content img{
+    width: 200px;
+}
+
+.input-container{
+    display: flex;
+    flex-direction: column;  
+    align-items: center;     
+    gap: 15px;               
+    margin-top: 20px;
+}
+
+input{
+    width: 200px;
+    text-align: center;
+    padding: 7px;
+    border-radius: 8px;
+    border: 2px solid #6e7201;
+}
+
+button{
+    width: 200px;
+    height: 40px;
+    text-align: center;
+    padding: 7px;
+    border-radius: 8px;
+    background-color: #6e7201;
+    cursor: pointer;
+    border: none;
+    color: white;
+    transition: transform 0.1s ease;
+}
+
+button:active {
+    transform: scale(0.95); /* shrink on click */
+}
+
+/* ===== TOAST NOTIFICATION ===== */
+#toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #333;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#toast.success {
+  background: #28a745;
+}
+
+#toast.error {
+  background: #dc3545;
+}

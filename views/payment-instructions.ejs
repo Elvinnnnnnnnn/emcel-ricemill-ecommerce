@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Payment Instructions</title>
+        <link rel="stylesheet" href="/css/payment-instructions.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    </head>
+        <body>
+
+            <header>
+                <a href="/">
+                    <img src="../../Photos/Emcel logo backround removed.png" height="50">
+                </a>
+            </header>
+
+            <div class="payment-wrapper">
+                <div class="payment-card">
+
+                    <h2>Complete Your Payment</h2>
+                    <p class="order-id">Order #<%= order.id %></p>
+
+                    <% if (order.payment === 'COD') { %>
+                    <h3>Cash on Delivery</h3>
+                    <p>Please prepare the exact amount.</p>
+
+                    <% } else if (order.payment === 'Gcash') { %>
+                    <h3>Pay via GCash</h3>
+                    <img src="/images/gcash-qr.png" class="qr">
+                    <p>Send to: 09XX-XXX-XXXX</p>
+                    <p><b>Reference:</b> ORDER-<%= order.id %></p>
+
+                    <% } else if (order.payment === 'Maya') { %>
+                    <h3>Pay via Maya</h3>
+                    <img src="/images/maya-qr.png" class="qr">
+
+                    <% } else if (order.payment === 'Bank Account') { %>
+                    <h3>Bank Transfer</h3>
+                    <p>Bank: BDO</p>
+                    <p>Account Name: EMCEL RICEMILL</p>
+                    <p><b>Reference:</b> ORDER-<%= order.id %></p>
+                    <% } %>
+
+                    <a href="/" class="back-home">Go back to Home</a>
+                </div>
+            </div>
+
+            <!-- Toast Notification -->
+<div id="toast"></div>
+
+            </body>
+
+</html>

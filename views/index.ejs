@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>EMCEL RICEMILL</title>
+		<link rel="stylesheet" href="/css/index.css">
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+	</head>
+
+	<body>
+
+		 <header>
+			<a href="#welcome"><img src="../../Photos/Emcel logo backround removed.png" height="50" alt=""></a>
+
+			 <div class="header-icons">
+				<div class="menu-toggle" id="menuToggle">
+				<i class="fa-solid fa-bars"></i>
+				</div>
+			</div>
+
+			<nav>
+				<ul>
+					<li><a href="#welcome">Home</a></li>
+					<li><a href="#aboutus">About Us</a></li>
+					<li><a href="#products" >Products</a></li>
+					<li><a href="#contacts">Contact</a></li>
+					<i class="fa-solid fa-cart-shopping" id="cartIcon"></i>
+				   
+					<% if (user) { %>
+						<li class="profile-menu">
+							<i id="profileIcon" class="fa-regular fa-user"></i>
+							
+						</li>
+					<% } else { %>
+						 <li class="login"><a href="/login">Log In</a></li>
+					<% } %>
+				</ul>
+			</nav>
+		</header>
+
+		<div id="profileDropdown" class="profile-dropdown">
+			<span class="close-profile">&times;</span>
+			<div class="profile-content">
+				<div class="accountmenu-container">
+					<p>Account Menu</p>
+				</div>
+				<div class="usermane-container">
+					<img 
+						src="/user_photos/<%= user.profile_photo || 'default.png' %>" 
+						alt="Profile Picture"
+						class="profile-avatar">
+					<div class="usernameEmail-container">
+						<p class="username-text"><%= user.firstname %> <%= user.lastname %></p>
+						<p class="useremail-text"><%= user.email %></p>
+					</div>
+				</div>
+				<div class="current-order-container">
+					<!-- CURRENT ORDER CARD -->
+					<% if (currentOrder) { %>
+					<div class="current-order-card">
+						<h4>Current Order #<%= currentOrder.id %></h4>
+
+						<p class="status">
+							<% if (currentOrder.status === 'pending') { %>
+								🕒 Pending Approval
+							<% } else if (currentOrder.status === 'processing') { %>
+								📦 Processing Order
+							<% } else if (currentOrder.status === 'out_for_delivery') { %>
+								🚚 Out for Delivery
+							<% } else if (currentOrder.status === 'delivered') { %>
+								✅ Delivered
+							<% } else { %>
+								❌ Cancelled
+							<% } %>
+						</p>
+
+						<% if (currentOrder.estimated_delivery) { %>
+							<p>Est: <%= currentOrder.estimated_delivery %></p>
+						<% } %>
+					</div>
+					<% } %>
+				</div>
+				<div class="orderhistory-container">
+					<i class="fa-solid fa-box"></i>
+					<p>Order History</p>
+				</div>
+				<div class="deliveryAddress-container">
+					<i class="fa-solid fa-location-dot"></i>
+					<button id="deliveryBtn" class="delivery-btn">
+						Delivery Addresses
+					</button>
+				</div>
+				<div class="settings-container">
+					<i class="fa-solid fa-gear"></i>
+					<p>Settings</p>
+				</div>
+				<div class="logout-container">
+					<a href="/auth/logout" class="logout-btn">Log Out</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- CART SECTION -->
+
+		<div class="cart-container">
+			<h2>Your Cart</h2>
+			<span id="closeCart" class="close-cart">&times;</span>
+
+			<!-- SCROLLABLE AREA -->
+			<div class="cart-items-wrapper">
+				<ul id="cartItems">
+				<li>
+					<div class="items-container">
+					<div>
+						<img class="product-image" src="/Photos/sakura.png" alt="Sakura Pink">
+					</div>
+					<div class="items-content">
+						<p class="item-name">Sakura Pink</p>
+						<p class="item-value">₱890</p>
+						<p class="item-kg">840/25kg</p>
+					</div>
+					<div class="quantity-content">
+						<input class="quantity-cart" type="number" min="1" value="1">
+						<p>Remove</p>
+					</div>
+					</div>
+				</li>
+				<!-- more items here -->
+				</ul>
+			</div>
+
+			<!-- STICKY FOOTER -->
+			<div class="cart-total">
+				<p>Total: ₱<span id="cartTotal">890</span></p>
+				<div class="checkout-container">
+				<button id="checkoutBtn">
+					<a class="checkout-text" href="/checkout">Checkout</a>
+				</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- WELCOME PAGE SECTION -->
+
+		<section id="welcome">
+			<div class="main_container">
+				<div class="welcome_container">
+					<h1>W E L C O M E</h1>
+					<h3>to eMcEL Rice Mill</h3>
+					<p>To offer quality Products to the people with the lowest possible prices, the best available selection, and the utmost convenience.</p>
+					<button>Let's Start</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- ABUOT US SECTION -->
+
+		<section id="aboutus">
+			<div class="aboutproducts">
+				<p>ABOUT US</p>
+				<h1>ABOUT <span>EMCEL RICEMILL</span></h1>
+			</div>
+			<div class="aboutUs-container">
+					<div class="aboutus-content">
+						<div class="aboutus-sentence-photo">
+							<div class="aboutus-photo">
+								<img class="aboutus-image" src="/Photos/About Us Photo.jpg" alt="About Us Photo">
+							</div>
+							<div class="aboutus-explanation-container">
+								<i class="qualitylocalprice">Quality local rice by the local farmers for every local consumers!</i><br>
+								<p><i class="fa-solid fa-circle-check"></i> <b>Rich in Fiber & Nutrients.</b> This product is packed with fiber and essential nutrients that your body needs to stay strong and energized.</p>
+								<p><i class="fa-solid fa-circle-check"></i> <b>Naturally Grown & Organic.</b> Grown naturally and organically, it’s free from harmful chemicals and synthetic additives. Each ingredient is carefully cultivated to preserve its natural goodness and pure flavor.</p>
+								<p><i class="fa-solid fa-circle-check"></i> <b>Supports Heart & Digestive Health.</b> Made with ingredients that promote heart and digestive health, this product helps maintain proper circulation and gut balance. Regular consumption supports your body’s natural rhythm and overall well-being.</p>
+								<img class="organicbrownrice-image" src="/Photos/Organic Brown Rice.png" alt="">
+							</div>
+						</div>
+					<div class="choose-us-container">
+						<div class="quality-container">
+							<div class="gem-container">
+								<i class="fa-regular fa-gem"></i>
+							</div>
+								<p class="quality-header">QUALITY</p>
+								<p class="quality-sentence">Our products are made with premium materials to ensure long-lasting quality you can trust.</p>
+						</div>
+						 <div class="quality-container">
+							<div class="gem-container">
+								<i class="fa-solid fa-chart-line"></i>
+							</div>
+								<p class="quality-header">CONSISTENT</p>
+								<p class="quality-sentence">We provide consistent performance every time so you always know what to expect.</p>
+						</div>
+						 <div class="quality-container">
+							<div class="gem-container">
+								<i class="fa-solid fa-tag"></i>
+							</div>
+								<p class="quality-header">AFFORDABLE</p>
+								<p class="quality-sentence">Our prices are affordable, giving you great value without sacrificing excellence.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- PRODUCTS SECTION -->
+
+		<section id="products">
+			<div class="aboutproducts">
+				<p>OUR PRODUCTS</p>
+				<h1>CHECK OUR <span>RICE PRODUCTS</span></h1>
+			</div>
+		   <div class="product-container">
+				<% products.forEach(product => { %>
+					<div class="product-card" data-product-id="<%= product.id %>">
+						<img src="/product_photos/<%= product.image %>" alt="<%= product.name %>" class="product-image">
+						<h3 class="product-name"><%= product.name %></h3>
+
+						<div class="rating">
+							<% for(let i = 1; i <= 5; i++) { %>
+								<i class="fa-solid fa-star <%= i <= Math.round(product.avg_rating) ? 'active' : '' %>"></i>
+							<% } %>
+							<span class="rating-text">
+								(<%= product.rating_count %>)
+							</span>
+						</div>
+
+						<h2 class="product-value">
+						₱<%= Number(product.variants?.[0]?.price || 0).toLocaleString() %>
+						</h2>
+
+						<p class="product-description">
+							High-quality rice, perfect for daily meals.
+						</p>
+
+						<!-- BUY BUTTON: includes main product info + first variant fallback -->
+						<button class="buy-button"
+							type="button"
+							data-id="<%= product.id %>"
+							data-name="<%= product.name %>"
+							data-description="<%= product.description %>"
+							data-image="/product_photos/<%= product.image %>"
+							data-price="<%= product.variants && product.variants.length ? product.variants[0].price : 0 %>"
+							data-kg="<%= product.variants && product.variants.length ? product.variants[0].kilograms : '' %>"
+							data-stock="<%= product.variants && product.variants.length ? product.variants[0].stock : 0 %>">
+						Buy Now
+						</button>
+					</div>
+					<% }) %>
+
+		   </div>
+
+			<div id="product-modal" class="modal">
+				<div class="modal-content">
+					<span class="close-btn">&times;</span>
+					<div class="image-container">
+						<img id="modal-image" src="" alt="" class="modal-image">
+					</div>
+					<div class="products-details-container">
+						<h2 id="modal-name" class="modal-name"></h2>
+						<h3 id="modal-price" class="modal-price"></h3>
+						<p id="modal-desc" class="modal-desc"></p>
+
+						<div class="kg-container" id="modal-variants">
+						</div>
+
+						<div class="quantity-container">
+							<label for="quantity">Quantity:</label>
+							<input type="number" id="quantity" min="1" value="1">
+						</div>
+
+						<button class="add-cart-btn">Add to Cart</button>
+						<p id="out-of-stock" class="out-of-stock" style="color:red; display:none;">Out of Stock</p>
+					</div>
+				</div>
+			</div>
+
+
+
+		</section>
+
+		<!-- CONTACTS SECTION -->
+
+		<section id="contacts">
+			<div class="contact-container">
+				<div class="contact-image-container">
+					<div class="contact-text">
+						<p class="ourcontactstext">OUR CONTACTS</p>
+						<h1>GET IN <span>TOUCH</span></h1>
+						<p class="getintouch">Get in touch with us for any inquiries or assistance you need. We’re always here to make sure you’re supported.</p>
+					</div>
+					<div class="contact-image">
+						<img src="/Photos/contact us image.png" alt="Contact Us">
+					</div>
+				</div>
+				<div class="contacts-box-container">
+					<div class="map-container">
+						<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3862.271438206342!2d121.2542845!3d14.5264602!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c1748b86d285%3A0xfb14042b06a7e453!2sEMCEL%20RICE%20MILL!5e0!3m2!1sen!2sph!4v1763360359326!5m2!1sen!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+					</div>
+					<div class="contacts-box-content">
+						<div class="visit-us-container">
+							<i class="fa-solid fa-house"></i>
+							<h6>VISIT US</h6>
+							<p class="contacts-box-text">Visit us today and experience our products and services firsthand.</p>
+							<p class="contacts-box-contacts">J. P. Rizal St, Morong, Rizal</p>
+						</div>
+						<div class="contact-us-container">
+							<i class="fa-solid fa-envelope"></i>
+							<h6>CONTACT US</h6>
+							<p class="contacts-box-text">Contact us anytime for inquiries, support, or more information.</p>
+							<div class="contact-email">
+								<i class="fa-brands fa-google"></i>
+								<p class="contacts-box-contacts">emcel.ricemill
+								@gmail.com</p>
+							</div>
+							<div class="contact-email">
+								<i class="fa-brands fa-facebook"></i>
+								<p class="contacts-box-contacts">https://www.facebook.com
+									/share/1EXrStQzDn/</p>
+							</div>
+						</div>
+						<div class="call-us-container">
+							<i class="fa-solid fa-phone"></i>
+							<h6>CALL US</h6>
+							<p class="contacts-box-text">Call us now and our friendly team will gladly assist you.</p>
+							<p class="contacts-box-contacts">+63-02-8880-4473</p>
+							<p class="contacts-box-contacts">+63-912-536-9029</p>
+							<p class="contacts-box-contacts">+63-917-183-8508</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		
+	<!-- ===== DELIVERY ADDRESSES PANEL ===== -->
+	<div id="deliveryPanel" class="delivery-panel">
+		<div class="delivery-header">
+			<h2>Delivery Addresses</h2>
+			<span id="closePanel" class="close-panel">&times;</span>
+		</div>
+
+	<div class="addresses-list">
+			<% if (addresses && addresses.length > 0) { %>
+				<% addresses.forEach(address => { %>
+					<div class="address-card">
+						<p class="name"><%= address.firstname %> <%= address.lastname %></p>
+						<p class="address"><%= address.address %>, <%= address.city %>, <%= address.region %></p>
+						<p class="phone"><%= address.phone %></p>
+						<button class="edit-address" data-id="<%= address.id %>">Edit</button>
+					</div>
+				<% }) %>
+			<% } else { %>
+				<p>No addresses saved yet.</p>
+			<% } %>
+		</div>
+
+		<div id="new-address-form" style="display: none; margin-top: 20px;">
+			<input type="text" id="firstname" placeholder="First Name" />
+			<input type="text" id="lastname" placeholder="Last Name" />
+			<input type="text" id="address" placeholder="Address" />
+			<input type="text" id="city" placeholder="City" />
+			<input type="text" id="region" placeholder="Region" />
+			<input type="text" id="postal" placeholder="Postal Code" />
+			<input type="text" id="phone" placeholder="Phone" />
+			<button id="save-address">Save Address</button>
+		</div>
+
+	<button class="add-new-address">+ Add New Address</button>
+
+
+		<!-- ===== ORDER HISTORY PANEL ===== -->
+	<div id="orderHistoryPanel" class="delivery-panel">
+		<div class="delivery-header">
+			<h2>Order History</h2>
+			<span id="closeOrderPanel" class="close-panel">&times;</span>
+		</div>
+
+		<div class="addresses-list">
+			<% if (orders && orders.length > 0) { %>
+				<% orders.forEach(order => { %>
+					<div class="address-card order-history-card" data-order-id="<%= order.id %>">
+
+					<div class="order-summary">
+						<p class="name">Order #<%= order.id %></p>
+						<p>Status:
+							<% if(order.status === 'pending') { %>
+								<span class="pending">Pending</span>
+							<% } else if(order.status === 'out_for_delivery') { %>
+								<span class="out_for_delivery">Out for Delivery</span>
+							<% } else if(order.status === 'delivered') { %>
+								<span class="delivered">Delivered</span>
+							<% } else { %>
+								<span class="cancelled">Cancelled</span>
+							<% } %>
+						</p>
+
+						<p>Est. Delivery: <%= order.estimated_delivery || 'N/A' %></p>
+						<p>Total: ₱<%= Number(order.total_amount || 0).toLocaleString() %></p>
+
+						<button class="view-details-btn">View Details</button>
+					</div>
+
+					<!-- EXPANDABLE AREA -->
+					<div class="order-details">
+						<div class="order-items">
+							<p class="loading-text">Loading order details...</p>
+						</div>
+					</div>
+				</div>
+				<% }) %>
+			<% } else { %>
+				<p>No past orders yet.</p>
+			<% } %>
+		</div>
+	</div>
+
+	<!-- ===== SETTINGS PANEL ===== -->
+<!-- ===== SETTINGS PANEL ===== -->
+<% if (user) { %>
+<div id="settingsPanel" class="delivery-panel">
+    <div class="delivery-header">
+        <h2>Settings</h2>
+        <span id="closeSettingsPanel" class="close-panel">&times;</span>
+    </div>
+
+    <div class="settings-content">
+        <!-- Profile Picture -->
+        <div class="settings-item">
+            <label for="profilePic">Profile Picture:</label>
+            <input type="file" id="profilePic" name="profile_photo" accept="image/*">
+
+            <img id="profilePreview"
+                 src="/user_photos/<%= user.profile_photo || 'default.png' %>"
+                 alt="Profile Picture"
+                 style="width:100px;height:100px;border-radius:50%;margin-top:10px;">
+        </div>
+
+        <!-- First Name -->
+        <div class="settings-item">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" value="<%= user.firstname %>">
+        </div>
+
+        <!-- Last Name -->
+        <div class="settings-item">
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" value="<%= user.lastname %>">
+        </div>
+
+        <!-- Email -->
+        <div class="settings-item">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="<%= user.email %>">
+        </div>
+
+        <button id="saveSettings" class="add-new-address">Save Changes</button>
+    </div>
+</div>
+<% } %>
+
+<!-- Toast Notification -->
+<div id="toast"></div>
+
+	</body>
+
+	<script type="application/json" id="products-data">
+		<%- JSON.stringify(products || []) %>
+		</script>
+
+	<script>
+		// safely parse it in JS
+		const products = JSON.parse(document.getElementById('products-data').textContent);
+	</script>
+
+	<script src="/js/index.js"></script>
+
+</html>

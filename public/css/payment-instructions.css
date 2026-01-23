@@ -1,0 +1,167 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: white url("../Photos/Logo gray.jpg") right no-repeat fixed;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ===== HEADER ===== */
+header {
+  background: #8A8F01;
+  padding: 10px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 80px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+header nav ul {
+  list-style: none;
+  display: flex;
+  gap: 50px;
+}
+
+header nav a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+header nav a:hover {
+  color: #EEBF78;
+}
+
+/* ===== PAYMENT PAGE ===== */
+.payment-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.payment-card {
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.payment-card h2 {
+  color: #8A8F01;
+  margin-bottom: 10px;
+}
+
+.order-id {
+  font-size: 13px;
+  color: gray;
+  margin-bottom: 20px;
+}
+
+.payment-card h3 {
+  margin-top: 15px;
+}
+
+.qr {
+  width: 200px;
+  margin: 15px auto;
+}
+
+.payment-card p {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.reference {
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+/* ===== TOAST NOTIFICATION ===== */
+#toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #333;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#toast.success {
+  background: #28a745;
+}
+
+#toast.error {
+  background: #dc3545;
+}
+
+
+/* QR */
+.qr-image {
+  width: 180px;
+  margin: 15px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+/* BUTTON */
+.home-btn {
+  display: inline-block;
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #8A8F01;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.home-btn:hover {
+  background: #6f7300;
+}
+
+.back-home {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #8A8F01;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .payment-card {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .qr {
+    width: 150px;
+  }
+}

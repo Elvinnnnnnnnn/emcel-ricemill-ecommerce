@@ -49,11 +49,11 @@ router.get('/dashboard', adminAuth.isAdminLoggedIn, (req, res) => {
             p.id,
             p.name,
             p.image,
+            p.is_active, -- ✅ REQUIRED
             GROUP_CONCAT(v.kilograms ORDER BY v.kilograms DESC SEPARATOR ', ') AS kilograms,
             GROUP_CONCAT(v.price ORDER BY v.kilograms DESC SEPARATOR ', ') AS prices
         FROM products p
         JOIN product_variants v ON p.id = v.product_id
-        WHERE p.is_active = 1
         GROUP BY p.id
     `;
 
@@ -375,12 +375,20 @@ router.post('/product/edit-variants/:id', adminAuth.isAdminLoggedIn, (req, res) 
 
 
 
-// ===== Soft Delete Product =====
-router.post('/product/delete/:id', adminAuth.isAdminLoggedIn, (req, res) => {
-    const productId = req.params.id;
-    const sql = 'UPDATE products SET is_active=0 WHERE id=?';
-    db.query(sql, [productId], (err) => {
-        if (err) return res.status(500).send("Database error");
+// Archive product
+router.post('/product/archive/:id', adminAuth.isAdminLoggedIn, (req, res) => {
+    const sql = 'UPDATE products SET is_active = 0 WHERE id = ?';
+    db.query(sql, [req.params.id], err => {
+        if (err) return res.status(500).json({ success: false });
+        res.json({ success: true });
+    });
+});
+
+// Unarchive product
+router.post('/product/unarchive/:id', adminAuth.isAdminLoggedIn, (req, res) => {
+    const sql = 'UPDATE products SET is_active = 1 WHERE id = ?';
+    db.query(sql, [req.params.id], err => {
+        if (err) return res.status(500).json({ success: false });
         res.json({ success: true });
     });
 });

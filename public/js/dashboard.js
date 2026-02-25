@@ -142,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (data.success) {
                 showToast("Product updated successfully!");
-                location.reload();
             } else {
                 showToast("Update failed");
             }
@@ -214,7 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (data.success) {
                 showToast("User updated successfully");
-                location.reload();
             } else {
                 showToast("Update failed");
             }
@@ -328,6 +326,60 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+document.addEventListener('click', e => {
+
+    // ARCHIVE
+    if (e.target.classList.contains('archive-btn')) {
+        const row = e.target.closest('tr');
+        const id = row.dataset.id;
+
+        fetch(`/admin/product/archive/${id}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Product archived successfully');
+
+                    // Update button instantly
+                    e.target.textContent = 'Unarchive';
+                    e.target.classList.remove('archive-btn');
+                    e.target.classList.add('unarchive-btn');
+
+                    // Optional: gray out row
+                    row.classList.add('archived');
+                } else {
+                    showToast('Failed to archive product', 'error');
+                }
+            })
+            .catch(() => {
+                showToast('Server error', 'error');
+            });
+    }
+
+    // UNARCHIVE
+    if (e.target.classList.contains('unarchive-btn')) {
+        const row = e.target.closest('tr');
+        const id = row.dataset.id;
+
+        fetch(`/admin/product/unarchive/${id}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Product restored successfully');
+
+                    e.target.textContent = 'Archive';
+                    e.target.classList.remove('unarchive-btn');
+                    e.target.classList.add('archive-btn');
+
+                    row.classList.remove('archived');
+                } else {
+                    showToast('Failed to restore product', 'error');
+                }
+            })
+            .catch(() => {
+                showToast('Server error', 'error');
+            });
+    }
+});
 
 });
 
@@ -342,3 +394,4 @@ function showToast(message, type = 'success') {
     toast.className = '';
   }, 2500);
 }
+

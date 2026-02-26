@@ -1403,6 +1403,54 @@ h6{
   margin-bottom: 10px;
 }
 
+.footer {
+  background: #000;
+  color: #fff;
+  padding: 60px 60px 30px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer h3 {
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+.footer p,
+.footer li {
+  font-size: 14px;
+  color: #d1d5db;
+  line-height: 1.7;
+}
+
+.footer ul {
+  list-style: none;
+}
+
+.footer a {
+  color: #d1d5db;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #333;
+  text-align: center;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
 /* MOBILE ONLY */
 @media (max-width: 830px) {
   /* Header layout stays clean */

@@ -13,14 +13,9 @@ dotenv.config({ path:'./.env' });
 // View engine & static files
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-// Serve public folder
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Product photos folder inside public
-// e.g., public/product_photos/myphoto.jpg
-// No need to create a second '/Photos' route if you store all images in public
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/product_photos', express.static('public/product_photos'));
-// serve user photos so browser can access them
 app.use('/user_photos', express.static('public/user_photos'));
 
 // Middleware
@@ -28,14 +23,13 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// ----------------- SESSION MIDDLEWARE -----------------
+// Session
 app.use(session({
-    secret: 'adminSecretKey123',  // change this to something secure
+    secret: 'adminSecretKey123',
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
+    cookie: { maxAge: 60 * 60 * 1000 }
 }));
-
 
 // Database connection
 const db = mysql.createConnection({
@@ -49,25 +43,26 @@ db.connect((error)=> {
   if(error){
     console.log(error);
   } else{
-    console.log("MYSQL Connected....")
+    console.log("MYSQL Connected....");
   }
 });
 
-// ----------------- ROUTES -----------------
+// Routes
 app.use('/', require('./routes/pages'));
-app.use('/auth', require('./routes/auth'));       // customer auth routes
-app.use('/admin', require('./routes/admin'));     // admin routes
+app.use('/auth', require('./routes/auth'));
+app.use('/admin', require('./routes/admin'));
 app.use('/address', require('./routes/address'));
 app.use('/orders', require('./routes/orders'));
 app.use('/', require('./routes/ratings'));
+app.use('/cart', require('./routes/carts'));
 
 app.get('/', authController.isLoggedIn, (req, res) => {
     res.render('index', { user: req.user });
 });
 
-app.use('/cart', require('./routes/carts'));
-
-app.use('/orders', require('./routes/orders'));
-
 // Start server
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});

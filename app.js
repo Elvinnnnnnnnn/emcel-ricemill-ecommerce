@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const dotenv = require("dotenv");
 const authController = require('./controllers/auth');
 const cookieParser = require('cookie-parser');
@@ -30,22 +30,6 @@ app.use(session({
     saveUninitialized: true,
     cookie: { maxAge: 60 * 60 * 1000 }
 }));
-
-// Database connection
-const db = mysql.createConnection({
-  host: process.env.DATABASE_HOST,
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE
-});
-
-db.connect((error)=> {
-  if(error){
-    console.log(error);
-  } else{
-    console.log("MYSQL Connected....");
-  }
-});
 
 // Routes
 app.use('/', require('./routes/pages'));

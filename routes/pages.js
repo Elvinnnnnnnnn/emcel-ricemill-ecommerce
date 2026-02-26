@@ -81,6 +81,9 @@ router.get('/', authController.isLoggedIn, (req, res) => {
         return res.status(500).send("Database error");
     }
 
+    console.log("PRODUCTS:", products);
+    console.log("PRODUCT COUNT:", products ? products.length : "undefined");
+
     if (!userId) {
         return res.render('index', {
             user: null,

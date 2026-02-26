@@ -11,7 +11,7 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 	</head>
 
-	<body>
+	<body data-logged-in="<%= user ? 'true' : 'false' %>">
 
 		 <header>
 			<a href="#welcome"><img src="../../Photos/Emcel logo backround removed.png" height="50" alt=""></a>
@@ -42,67 +42,80 @@
 			</nav>
 		</header>
 
-		<div id="profileDropdown" class="profile-dropdown">
-			<span class="close-profile">&times;</span>
-			<div class="profile-content">
-				<div class="accountmenu-container">
-					<p>Account Menu</p>
-				</div>
-				<div class="usermane-container">
-					<img 
-						src="/user_photos/<%= user.profile_photo || 'default.png' %>" 
-						alt="Profile Picture"
-						class="profile-avatar">
-					<div class="usernameEmail-container">
-						<p class="username-text"><%= user.firstname %> <%= user.lastname %></p>
-						<p class="useremail-text"><%= user.email %></p>
+		<% if (user) { %>
+			<div id="profileDropdown" class="profile-dropdown">
+				<span class="close-profile">&times;</span>
+
+				<div class="profile-content">
+					<div class="accountmenu-container">
+						<p>Account Menu</p>
 					</div>
-				</div>
-				<div class="current-order-container">
-					<!-- CURRENT ORDER CARD -->
-					<% if (currentOrder) { %>
-					<div class="current-order-card">
-						<h4>Current Order #<%= currentOrder.id %></h4>
 
-						<p class="status">
-							<% if (currentOrder.status === 'pending') { %>
-								🕒 Pending Approval
-							<% } else if (currentOrder.status === 'processing') { %>
-								📦 Processing Order
-							<% } else if (currentOrder.status === 'out_for_delivery') { %>
-								🚚 Out for Delivery
-							<% } else if (currentOrder.status === 'delivered') { %>
-								✅ Delivered
-							<% } else { %>
-								❌ Cancelled
+					<div class="usermane-container">
+						<img 
+							src="/user_photos/<%= user.profile_photo ? user.profile_photo : 'default.png' %>" 
+							alt="Profile Picture"
+							class="profile-avatar">
+
+						<div class="usernameEmail-container">
+							<p class="username-text">
+								<%= user.firstname %> <%= user.lastname %>
+							</p>
+							<p class="useremail-text">
+								<%= user.email %>
+							</p>
+						</div>
+					</div>
+
+					<div class="current-order-container">
+						<% if (currentOrder) { %>
+						<div class="current-order-card">
+							<h4>Current Order #<%= currentOrder.id %></h4>
+
+							<p class="status">
+								<% if (currentOrder.status === 'pending') { %>
+									🕒 Pending Approval
+								<% } else if (currentOrder.status === 'processing') { %>
+									📦 Processing Order
+								<% } else if (currentOrder.status === 'out_for_delivery') { %>
+									🚚 Out for Delivery
+								<% } else if (currentOrder.status === 'delivered') { %>
+									✅ Delivered
+								<% } else { %>
+									❌ Cancelled
+								<% } %>
+							</p>
+
+							<% if (currentOrder.estimated_delivery) { %>
+								<p>Est: <%= currentOrder.estimated_delivery %></p>
 							<% } %>
-						</p>
-
-						<% if (currentOrder.estimated_delivery) { %>
-							<p>Est: <%= currentOrder.estimated_delivery %></p>
+						</div>
 						<% } %>
 					</div>
-					<% } %>
-				</div>
-				<div class="orderhistory-container">
-					<i class="fa-solid fa-box"></i>
-					<p>Order History</p>
-				</div>
-				<div class="deliveryAddress-container">
-					<i class="fa-solid fa-location-dot"></i>
-					<button id="deliveryBtn" class="delivery-btn">
-						Delivery Addresses
-					</button>
-				</div>
-				<div class="settings-container">
-					<i class="fa-solid fa-gear"></i>
-					<p>Settings</p>
-				</div>
-				<div class="logout-container">
-					<a href="/auth/logout" class="logout-btn">Log Out</a>
+
+					<div class="orderhistory-container">
+						<i class="fa-solid fa-box"></i>
+						<p>Order History</p>
+					</div>
+
+					<div class="deliveryAddress-container">
+						<i class="fa-solid fa-location-dot"></i>
+						<button id="deliveryBtn" class="delivery-btn">
+							Delivery Addresses
+						</button>
+					</div>
+
+					<div class="settings-container">
+						<i class="fa-solid fa-gear"></i>
+						<p>Settings</p>
+					</div>
+
+					<div class="logout-container">
+						<a href="/auth/logout" class="logout-btn">Log Out</a>
+					</div>
 				</div>
 			</div>
-		</div>
+			<% } %>
 
 		<!-- CART SECTION -->
 
@@ -135,12 +148,17 @@
 
 			<!-- STICKY FOOTER -->
 			<div class="cart-total">
-				<p>Total: ₱<span id="cartTotal">890</span></p>
+
+				<p>Subtotal: ₱<span id="cartSubtotal">0</span></p>
+				<p>Shipping: ₱<span id="cartShipping">50</span></p>
+				<p><strong>Total: ₱<span id="cartTotal">0</span></strong></p>
+
 				<div class="checkout-container">
-				<button id="checkoutBtn">
-					<a class="checkout-text" href="/checkout">Checkout</a>
-				</button>
+					<button id="checkoutBtn">
+						<a class="checkout-text" href="/checkout">Checkout</a>
+					</button>
 				</div>
+
 			</div>
 		</div>
 
@@ -261,6 +279,7 @@
 					<div class="products-details-container">
 						<h2 id="modal-name" class="modal-name"></h2>
 						<h3 id="modal-price" class="modal-price"></h3>
+						<p id="modal-stock" class="modal-stock"></p>
 						<p id="modal-desc" class="modal-desc"></p>
 
 						<div class="kg-container" id="modal-variants">
@@ -398,7 +417,8 @@
 						</p>
 
 						<p>Est. Delivery: <%= order.estimated_delivery || 'N/A' %></p>
-						<p>Total: ₱<%= Number(order.total_amount || 0).toLocaleString() %></p>
+						<p>Shipping: ₱<%= Number(order.shipping_fee || 0).toLocaleString() %></p>
+						<p>Total Paid: ₱<%= Number(order.total_amount || 0).toLocaleString() %></p>
 
 						<button class="view-details-btn">View Details</button>
 					</div>

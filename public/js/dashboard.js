@@ -395,3 +395,93 @@ function showToast(message, type = 'success') {
   }, 2500);
 }
 
+const createAdminBtn = document.getElementById('createAdminBtn');
+
+if (createAdminBtn) {
+  createAdminBtn.addEventListener('click', async () => {
+    const displayName = document.getElementById('newAdminName').value;
+    const email = document.getElementById('newAdminEmail').value;
+    const password = document.getElementById('newAdminPassword').value;
+
+    const res = await fetch('/admin/create-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ displayName, email, password })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showToast('Admin created successfully');
+      document.getElementById('newAdminName').value = '';
+      document.getElementById('newAdminEmail').value = '';
+      document.getElementById('newAdminPassword').value = '';
+    } else {
+      showToast(data.message || 'Failed to create admin', 'error');
+    }
+  });
+}
+
+document.addEventListener('click', async (e) => {
+
+  const approveBtn = e.target.closest('.approve-btn');
+  const deliveryBtn = e.target.closest('.delivery-btn');
+  const deliveredBtn = e.target.closest('.delivered-btn');
+  const rejectBtn = e.target.closest('.reject-btn');
+
+  if (!approveBtn && !deliveryBtn && !deliveredBtn && !rejectBtn) return;
+
+  const btn = approveBtn || deliveryBtn || deliveredBtn || rejectBtn;
+  const orderItem = btn.closest('.order-item');
+  const orderId = orderItem.dataset.id;
+  const statusText = orderItem.querySelector('.status-text');
+
+  let url = '';
+
+  if (approveBtn) url = `/admin/order/approve/${orderId}`;
+  if (deliveryBtn) url = `/admin/order/out-for-delivery/${orderId}`;
+  if (deliveredBtn) url = `/admin/order/delivered/${orderId}`;
+  if (rejectBtn) url = `/admin/order/reject/${orderId}`;
+
+  const res = await fetch(url, { method: 'POST' });
+  const data = await res.json();
+
+  if (!data.success) {
+    showToast('Update failed', 'error');
+    return;
+  }
+
+  showToast('Order updated');
+
+  // Update UI without refresh
+  // Update UI without refresh
+    if (approveBtn) {
+    btn.textContent = 'Out for Delivery';
+    btn.classList.remove('approve-btn');
+    btn.classList.add('delivery-btn');
+    statusText.textContent = 'PROCESSING';
+    }
+    else if (deliveryBtn) {
+    btn.textContent = 'Mark as Delivered';
+    btn.classList.remove('delivery-btn');
+    btn.classList.add('delivered-btn');
+    statusText.textContent = 'OUT_FOR_DELIVERY';
+    }
+    else if (deliveredBtn) {
+    btn.remove();
+    statusText.textContent = 'DELIVERED';
+    }
+    else if (rejectBtn) {
+    orderItem.remove();
+    }
+
+});
+
+const salesFilter = document.getElementById('salesFilter');
+
+if (salesFilter) {
+    salesFilter.addEventListener('change', () => {
+        const value = salesFilter.value;
+        window.location.href = `/admin/dashboard?filter=${value}#sales`;
+    });
+}

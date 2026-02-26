@@ -183,46 +183,37 @@
                 <!-- Order Handling -->
                 <section id="orders" class="section">
                     <h2>Order Handling</h2>
+
                     <div class="order-list">
                         <% pendingOrders.forEach(order => { %>
-                            <div class="order-item">
+                        <div class="order-item" data-id="<%= order.orderId %>">
+
                             <p>
-                                Order #<%= order.orderId %> -
-                                <%= order.firstname %> <%= order.lastname %> -
-                                <strong><%= order.status.toUpperCase() %></strong>
+                            Order #<%= order.orderId %> -
+                            <%= order.firstname %> <%= order.lastname %> -
+                            <strong class="status-text">
+                                <%= order.status.toUpperCase() %>
+                            </strong>
                             </p>
 
-                            <!-- APPROVE -->
                             <% if (order.status === 'pending') { %>
-                                <form action="/admin/order/approve/<%= order.orderId %>" method="POST">
-                                    <button class="approve-btn">Approve</button>
-                                </form>
+                            <button class="order-btn approve-btn">Approve</button>
                             <% } %>
 
-                            <!-- OUT FOR DELIVERY -->
                             <% if (order.status === 'processing') { %>
-                                <form action="/admin/order/out-for-delivery/<%= order.orderId %>" method="POST">
-                                    <button class="edit-btn">Out for Delivery</button>
-                                </form>
+                            <button class="order-btn delivery-btn">Out for Delivery</button>
                             <% } %>
 
-                            <!-- DELIVERED -->
                             <% if (order.status === 'out_for_delivery') { %>
-                                <form action="/admin/order/delivered/<%= order.orderId %>" method="POST"
-                                    onsubmit="return confirm('Confirm this order is delivered?');">
-                                    <button class="approve-btn">Mark as Delivered</button>
-                                </form>
+                            <button class="order-btn delivered-btn">Mark as Delivered</button>
                             <% } %>
 
-                            <!-- CANCEL -->
-                            <form action="/admin/order/reject/<%= order.orderId %>" method="POST">
-                                <button class="reject-btn">Cancel</button>
-                            </form>
-                        </div>
+                            <button class="order-btn reject-btn">Cancel</button>
 
+                        </div>
                         <% }) %>
                     </div>
-                </section>
+                    </section>
 
 
                 <!-- Order Tracking -->
@@ -265,11 +256,28 @@
                 <section id="sales" class="section">
                     <h2>Sales Tracking</h2>
 
+                    <div class="sales-filter">
+                        <select id="salesFilter">
+                            <option value="overall" <%= filter === 'overall' || !filter ? 'selected' : '' %>>Overall</option>
+                            <option value="week" <%= filter === 'week' ? 'selected' : '' %>>This Week</option>
+                            <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
+                            <option value="year" <%= filter === 'year' ? 'selected' : '' %>>This Year</option>
+                        </select>
+                    </div>
+
+                    <a 
+                        href="/admin/sales-report/pdf?filter=<%= filter || 'overall' %>"
+                        target="_blank"
+                        class="print-btn">
+                        Download PDF
+                    </a>
+
                     <div class="chart-wrapper">
                         <canvas id="salesChart"></canvas>
                     </div>
 
                     <div class="sales-metrics">
+                        <p>Shipping Revenue: ₱<%= Number(shippingRevenue).toLocaleString() %></p>
                         <p>Top Product: <%= topProduct.name %> - ₱<%= Number(topProduct.totalSales).toLocaleString() %></p>
                         <p>Monthly Growth: <%= monthlyGrowth %>%</p>
                     </div>
@@ -299,6 +307,19 @@
                             <% }) %>
                         </tbody>
                     </table>
+                    <h3 style="margin-top:30px;">Create Admin Account</h3>
+
+                    <div class="admin-create-section">
+                        <h3>Create Admin Account</h3>
+
+                        <div class="admin-create-form">
+                            <input type="text" id="newAdminName" placeholder="Display Name" required>
+                            <input type="email" id="newAdminEmail" placeholder="Email" required>
+                            <input type="password" id="newAdminPassword" placeholder="Password" required>
+
+                            <button id="createAdminBtn">Create Admin</button>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Edit User Modal -->

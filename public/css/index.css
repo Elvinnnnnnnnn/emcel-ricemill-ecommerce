@@ -1397,6 +1397,12 @@ h6{
   background: #dc3545;
 }
 
+.modal-stock {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
 /* MOBILE ONLY */
 @media (max-width: 830px) {
   /* Header layout stays clean */

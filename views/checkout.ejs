@@ -147,9 +147,21 @@
                                         <% }) %>
 
 
+                                        <div class="subtotal-container">
+                                            <p class="product-subtotal-text">Subtotal</p>
+                                            <p>₱<%= subtotal.toLocaleString() %></p>
+                                        </div>
+
+                                        <div class="shipping-container">
+                                            <p class="product-shipping-text">Shipping Fee</p>
+                                            <p>₱<%= shipping.toLocaleString() %></p>
+                                        </div>
+
                                         <div class="total-container">
-                                            <p class="product-total-text">Total</p>
-                                            <p class="product-total">₱<%= total.toLocaleString() %></p>
+                                            <p class="product-total-text"><strong>Total</strong></p>
+                                            <p class="product-total">
+                                                <strong>₱<%= total.toLocaleString() %></strong>
+                                            </p>
                                         </div>
 
                                         <button type="submit" id="checkoutBtn">Complete order</button>

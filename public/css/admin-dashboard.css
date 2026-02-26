@@ -770,6 +770,209 @@ h2, h3 {
   background: #dc3545;
 }
 
+/* ===== CREATE ADMIN SECTION ===== */
+
+.admin-create-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.admin-create-section h3 {
+    margin-bottom: 15px;
+    color: #6e7201;
+    font-weight: 600;
+}
+
+.admin-create-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    align-items: center;
+}
+
+.admin-create-form input {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-create-form input:focus {
+    outline: none;
+    border-color: #6e7201;
+    box-shadow: 0 0 5px rgba(110, 114, 1, 0.3);
+}
+
+.admin-create-form button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    background-color: #8A8F01;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.admin-create-form button:hover {
+    background-color: #6e7201;
+}
+
+.admin-create-form button:active {
+    transform: scale(0.97);
+}
+
+/* ===== ORDER BUTTONS ===== */
+
+.order-btn {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+/* Approve */
+.approve-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Out for Delivery */
+.delivery-btn {
+    background-color: #ffc107;
+    color: #000;
+}
+
+/* Mark as Delivered */
+.delivered-btn {
+    background-color: #17a2b8;
+    color: white;
+}
+
+/* Cancel */
+.reject-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ===== SALES FILTER + BUTTONS ===== */
+
+.print-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    background-color: #8A8F01;
+    color: #ffffff;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    margin-right: 10px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.print-btn:hover {
+    background-color: #6e7201;
+}
+
+.print-btn:active {
+    transform: scale(0.97);
+}
+
+.sales-filter {
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+.sales-filter form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.sales-filter input[type="date"] {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.sales-filter button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: #8A8F01;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.sales-filter button:hover {
+    background-color: #6e7201;
+}
+
+.sales-filter button:active {
+    transform: scale(0.97);
+}
+
+/* Improve Sales Metrics Layout */
+
+.sales-metrics {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.sales-metrics .card {
+    flex: 1;
+    min-width: 220px;
+}
+
+/* Chart spacing */
+
+.chart-wrapper {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* Better spacing for header buttons */
+
+#sales h2 {
+    margin-bottom: 10px;
+}
+
+#sales > a,
+#sales > button {
+    margin-top: 5px;
+}
+
+@media print {
+
+  body * {
+    visibility: hidden;
+  }
+
+  #sales, #sales * {
+    visibility: visible;
+  }
+
+  #sales {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+}
+
 /* Responsive for small screens */
 @media (max-width: 768px) {
     .settings-sidebar {

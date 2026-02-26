@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  const modalStock = document.getElementById('modal-stock');
   const modal = document.getElementById('product-modal');
   const closeBtn = document.querySelector('.close-btn');
   const modalImage = document.getElementById('modal-image');
@@ -53,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modalName.textContent = name;
     modalDesc.textContent = description;
     modalPrice.textContent = `₱${Number(price).toLocaleString()}`;
+    modalStock.textContent = `Available: ${stock} sacks`;
 
     const serverProduct = Array.isArray(products)
       ? products.find(p => String(p.id) === String(id))
@@ -89,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
       firstVariantBtn.classList.add('selected-kg');
       const addCartBtn = modal.querySelector('.add-cart-btn');
       addCartBtn.dataset.price = firstVariantBtn.dataset.price;
+      modalStock.textContent = `Available: ${firstVariantBtn.dataset.stock} sacks`;
       addCartBtn.dataset.variantId = firstVariantBtn.dataset.variantId || null;
     }
 
@@ -117,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btn.classList.add('selected-kg');
 
     modalPrice.textContent = `₱${Number(btn.dataset.price).toLocaleString()}`;
+    modalStock.textContent = `Available: ${btn.dataset.stock} sacks`;
     outOfStockText.style.display = Number(btn.dataset.stock) === 0 ? 'block' : 'none';
 
     const addCartBtn = modal.querySelector('.add-cart-btn');
@@ -137,58 +141,107 @@ document.addEventListener("DOMContentLoaded", () => {
         variant_id: selectedVariant ? selectedVariant.dataset.variantId : null
       };
 
-      const res = await fetch('/cart/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productId: product.id,
-          quantity: product.quantity,
-          price: product.price,
-          variantId: product.variant_id
-        })
-      });
+        const res = await fetch('/cart/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: product.id,
+            quantity: product.quantity,
+            price: product.price,
+            variantId: product.variant_id
+          })
+        });
 
-      const data = await res.json();
-      if (data.success) loadCart();
-    });
+        const data = await res.json();
+
+        if (!data.success) {
+          showToast(data.message, 'error');
+          return;
+        }
+
+        showToast('Added to cart successfully');
+        loadCart();
+      });
   });
 
   // Load cart
   async function loadCart() {
-    const res = await fetch('/cart');
-    const cart = await res.json();
+    try {
+      const res = await fetch('/cart', {
+        credentials: 'include'
+      });
 
-    let total = 0;
-    cartItems.innerHTML = '';
+      if (!res.ok) {
+        console.log('Cart request failed:', res.status);
+        return;
+      }
 
-    cart.forEach(item => {
-      total += item.price * item.quantity;
+      const cart = await res.json();
 
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <div class="items-container">
-          <div><img class="cart-checkout-image" src="/product_photos/${item.image}" alt="${item.name}"></div>
-          <div class="items-content">
-            <p class="item-name">${item.name} ${item.variant ? '(' + item.variant + ')' : ''}</p>
-            <p class="item-value">₱${Number(item.price).toLocaleString()}</p>
+      if (!Array.isArray(cart)) {
+        console.log('Cart is not an array:', cart);
+        return;
+      }
+
+      let total = 0;
+      cartItems.innerHTML = '';
+
+      cart.forEach(item => {
+        total += item.price * item.quantity;
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="items-container">
+            <div>
+              <img class="cart-checkout-image"
+                src="/product_photos/${item.image}"
+                alt="${item.name}">
+            </div>
+            <div class="items-content">
+              <p class="item-name">
+                ${item.name} ${item.variant ? '(' + item.variant + ')' : ''}
+              </p>
+              <p class="item-value">
+                ₱${Number(item.price).toLocaleString()}
+              </p>
+            </div>
+            <div class="quantity-content">
+              <input class="quantity-cart"
+                type="number"
+                data-id="${item.cartId}"
+                value="${item.quantity}"
+                min="1">
+              <p class="remove-item"
+                data-id="${item.cartId}">
+                Remove
+              </p>
+            </div>
           </div>
-          <div class="quantity-content">
-            <input class="quantity-cart" type="number" data-id="${item.cartId}" value="${item.quantity}" min="1">
-            <p class="remove-item" data-id="${item.cartId}">Remove</p>
-          </div>
-        </div>`;
-      cartItems.appendChild(li);
-    });
+        `;
+        cartItems.appendChild(li);
+      });
 
-    cartTotal.textContent = total.toLocaleString();
-    setupCartItemListeners();
+      const SHIPPING_FEE = 50;
+      const subtotal = total;
+      const finalTotal = subtotal + SHIPPING_FEE;
+
+      document.getElementById('cartSubtotal').textContent = subtotal.toLocaleString();
+      document.getElementById('cartShipping').textContent = SHIPPING_FEE.toLocaleString();
+      cartTotal.textContent = finalTotal.toLocaleString();
+      setupCartItemListeners();
+
+    } catch (err) {
+      console.error('Error loading cart:', err);
+    }
   }
 
   function setupCartItemListeners() {
     document.querySelectorAll('.remove-item').forEach(btn => {
       btn.addEventListener('click', async () => {
         await fetch(`/cart/${btn.dataset.id}`, { method: 'DELETE' });
-        loadCart();
+        if (document.body.dataset.loggedIn === "true") {
+          loadCart();
+        }
       });
     });
 
@@ -200,12 +253,16 @@ document.addEventListener("DOMContentLoaded", () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ quantity })
         });
-        loadCart();
+        if (document.body.dataset.loggedIn === "true") {
+          loadCart();
+        }
       });
     });
   }
 
-  loadCart();
+    if (document.body.dataset.loggedIn === "true") {
+      loadCart();
+    }
 });
 
 
@@ -244,19 +301,20 @@ const deliveryBtn = document.getElementById('deliveryBtn');
 const deliveryPanel = document.getElementById('deliveryPanel');
 const closePanel = document.getElementById('closePanel');
 
-deliveryBtn.addEventListener('click', () => {
-    // 1️⃣ Close profile dropdown if open
-    if (profileDropdown.classList.contains('show')) {
-        profileDropdown.classList.remove('show');
+if (deliveryBtn && deliveryPanel) {
+  deliveryBtn.addEventListener('click', () => {
+    if (profileDropdown && profileDropdown.classList.contains('show')) {
+      profileDropdown.classList.remove('show');
     }
-
-    // 2️⃣ Show delivery panel
     deliveryPanel.classList.add('active');
-});
+  });
+}
 
-closePanel.addEventListener('click', () => {
+if (closePanel && deliveryPanel) {
+  closePanel.addEventListener('click', () => {
     deliveryPanel.classList.remove('active');
-});
+  });
+}
 
 // Optional: close if clicked outside
 window.addEventListener('click', (e) => {
@@ -266,25 +324,40 @@ window.addEventListener('click', (e) => {
 });
 
 async function loadAddresses() {
-    const res = await fetch('/delivery');
+  try {
+    const res = await fetch('/delivery', {
+      credentials: 'include'
+    });
+
+    if (!res.ok) return;
+
     const addresses = await res.json();
+
+    if (!Array.isArray(addresses)) return;
+
     const addressesList = document.querySelector('.addresses-list');
+    if (!addressesList) return;
+
     addressesList.innerHTML = '';
 
     addresses.forEach(addr => {
       const div = document.createElement('div');
       div.className = 'address-card';
       div.innerHTML = `
-          <p class="name">${addr.firstname} ${addr.lastname}</p>
-          <p class="address">${addr.address}, ${addr.city}</p>
-          <p class="phone">${addr.phone}</p>
-          <button class="edit-address" data-id="${addr.id}">Edit</button>
-          <button class="delete-address" data-id="${addr.id}">Delete</button>
+        <p class="name">${addr.firstname} ${addr.lastname}</p>
+        <p class="address">${addr.address}, ${addr.city}</p>
+        <p class="phone">${addr.phone}</p>
+        <button class="edit-address" data-id="${addr.id}">Edit</button>
+        <button class="delete-address" data-id="${addr.id}">Delete</button>
       `;
       addressesList.appendChild(div);
-  });
+    });
 
     setupAddressButtons();
+
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function setupAddressButtons() {
@@ -310,7 +383,9 @@ function setupAddressButtons() {
 }
 
 // Load initially
-loadAddresses();
+if (document.body.dataset.loggedIn === "true") {
+  loadAddresses();
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const addBtn = document.querySelector('.add-new-address');
@@ -343,7 +418,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (res.ok) {
         showToast('Address saved!');
-        loadAddresses(); // reload addresses dynamically instead of refreshing
+        if (document.body.dataset.loggedIn === "true") {
+          loadAddresses();
+        }// reload addresses dynamically instead of refreshing
         const form = document.getElementById('new-address-form');
         if (form) form.style.display = 'none';
       } else {
@@ -390,20 +467,20 @@ const orderHistoryBtn = document.querySelector('.orderhistory-container');
 const orderHistoryPanel = document.getElementById('orderHistoryPanel');
 const closeOrderPanel = document.getElementById('closeOrderPanel');
 
-orderHistoryBtn.addEventListener('click', () => {
-    // Close profile dropdown first
-    if (profileDropdown.classList.contains('show')) {
-        profileDropdown.classList.remove('show');
+if (orderHistoryBtn && orderHistoryPanel) {
+  orderHistoryBtn.addEventListener('click', () => {
+    if (profileDropdown && profileDropdown.classList.contains('show')) {
+      profileDropdown.classList.remove('show');
     }
-
-    // Open order history panel
     orderHistoryPanel.classList.add('active');
-});
+  });
+}
 
-closeOrderPanel.addEventListener('click', () => {
+if (closeOrderPanel && orderHistoryPanel) {
+  closeOrderPanel.addEventListener('click', () => {
     orderHistoryPanel.classList.remove('active');
-});
-
+  });
+}
 
 // Elements
 const settingsContainer = document.querySelector('.settings-container');
@@ -411,39 +488,42 @@ const settingsPanel = document.getElementById('settingsPanel');
 const closeSettingsPanel = document.getElementById('closeSettingsPanel');
 
 // Open Settings Panel
-settingsContainer.addEventListener('click', () => {
-    // Close profile dropdown first
-    if (profileDropdown.classList.contains('show')) {
-        profileDropdown.classList.remove('show');
+if (settingsContainer && settingsPanel) {
+  settingsContainer.addEventListener('click', () => {
+    if (profileDropdown && profileDropdown.classList.contains('show')) {
+      profileDropdown.classList.remove('show');
     }
-
-    // Open settings panel
     settingsPanel.classList.add('active');
-});
-
+  });
+}
 
 // Close Settings Panel
-closeSettingsPanel.addEventListener('click', () => {
+if (closeSettingsPanel && settingsPanel) {
+  closeSettingsPanel.addEventListener('click', () => {
     settingsPanel.classList.remove('active');
-});
+  });
+}
 
 const profilePicInput = document.getElementById('profilePic');
 const profilePreview = document.getElementById('profilePreview');
 const saveSettingsBtn = document.getElementById('saveSettings');
 
-profilePicInput.addEventListener('change', (e) => {
+if (profilePicInput && profilePreview) {
+  profilePicInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = () => {
-        profilePreview.src = reader.result;
+      profilePreview.src = reader.result;
     };
     reader.readAsDataURL(file);
-});
+  });
+}
 
-saveSettingsBtn.addEventListener('click', async () => {
-    const formData = new FormData();
+if (saveSettingsBtn) {
+  saveSettingsBtn.addEventListener('click', async () => {
+    // your existing code hereconst formData = new FormData();
     const file = profilePicInput.files[0];
 
     if (file) {
@@ -476,7 +556,8 @@ saveSettingsBtn.addEventListener('click', async () => {
         console.error(err);
         showToast('Error updating profile');
     }
-});
+  });
+}
 
 document.addEventListener('click', async (e) => {
     const btn = e.target.closest('.view-details-btn');

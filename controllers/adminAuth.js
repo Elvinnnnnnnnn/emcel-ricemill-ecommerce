@@ -5,9 +5,9 @@ const session = require('express-session');
 
 // ADMIN LOGIN
 exports.adminLogin = (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    db.query('SELECT * FROM admins WHERE username = ?', [username], async (err, results) => {
+    db.query('SELECT * FROM admins WHERE email = ?', [email], async (err, results) => {
         if (err) return res.render('admin-login', { message: 'Database error' });
         if (results.length === 0) return res.render('admin-login', { message: 'Admin not found' });
 
@@ -15,9 +15,8 @@ exports.adminLogin = (req, res) => {
         const match = await bcrypt.compare(password, admin.password);
         if (!match) return res.render('admin-login', { message: 'Incorrect password' });
 
-        // Store admin info in session
         req.session.admin = admin;
-        res.redirect('/admin/dashboard'); // redirect to admin dashboard
+        res.redirect('/admin/dashboard');
     });
 };
 

@@ -90,10 +90,10 @@ router.get('/', authController.isLoggedIn, (req, res) => {
             SELECT 
                 o.id,
                 o.status,
-                o.estimated_delivery
+                o.estimated_delivery,
+                o.total_amount,
+                o.shipping_fee
             FROM orders o
-            WHERE o.user_id = ?
-            ORDER BY o.id DESC
         `;
 
         const addressesSql = `SELECT * FROM shipping_details WHERE user_id = ?`;
@@ -233,20 +233,28 @@ router.get('/checkout', authController.isLoggedIn, (req, res) => {
 }
 
 
-            const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+           const subtotal = cartItems.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+            );
+
+            const SHIPPING_FEE = 50;
+            const total = subtotal + SHIPPING_FEE;
 
             res.render('checkout', {
-                user: req.user,
-                cartItems,
-                total,
-                address
+            user: req.user,
+            cartItems,
+            subtotal,
+            shipping: SHIPPING_FEE,
+            total,
+            address
             });
         });
     });
 });
 
 // ===== Delivery addresses API =====
-router.get('/delivery', authController.isLoggedIn, (req, res) => {
+router.get('/delivery', authController.isLoggedIn, authController.protect, (req, res) => {
     const userId = req.user.id;
     db.query('SELECT * FROM shipping_details WHERE user_id = ?', [userId], (err, results) => {
         if (err) return res.status(500).json({ error: 'Database error' });
@@ -254,7 +262,7 @@ router.get('/delivery', authController.isLoggedIn, (req, res) => {
     });
 });
 
-router.post('/delivery', authController.isLoggedIn, (req, res) => {
+router.post('/delivery', authController.isLoggedIn, authController.protect, (req, res) => {
     const userId = req.user.id;
     const { firstname, lastname, address, city, region, postal, phone } = req.body;
 
@@ -267,7 +275,7 @@ router.post('/delivery', authController.isLoggedIn, (req, res) => {
     });
 });
 
-router.delete('/delivery/:id', authController.isLoggedIn, (req, res) => {
+router.delete('/delivery/:id', authController.isLoggedIn, authController.protect, (req, res) => {
     const addressId = req.params.id;
     const userId = req.user.id;
 
@@ -283,7 +291,7 @@ router.delete('/delivery/:id', authController.isLoggedIn, (req, res) => {
     });
 });
 
-router.get('/delivery/:id', authController.isLoggedIn, (req, res) => {
+router.get('/delivery/:id', authController.isLoggedIn, authController.protect, (req, res) => {
     const addressId = req.params.id;
     const userId = req.user.id;
 
@@ -304,7 +312,7 @@ router.get('/my-orders', authController.isLoggedIn, (req, res) => {
 });
 
 // ===== Order Details (for Order History expand) =====
-router.get('/orders/:id/details', authController.isLoggedIn, (req, res) => {
+router.get('/orders/:id/details', authController.isLoggedIn, authController.protect, (req, res) => {
     const orderId = req.params.id;
     const userId = req.user.id;
 
@@ -335,7 +343,7 @@ router.get('/orders/:id/details', authController.isLoggedIn, (req, res) => {
     });
 });
 
-router.get('/payment/:orderId', authController.isLoggedIn, (req, res) => {
+router.get('/payment/:orderId', authController.isLoggedIn, authController.protect, (req, res) => {
   const orderId = req.params.orderId;
   const userId = req.user.id;
 

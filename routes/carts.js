@@ -6,25 +6,67 @@ const authController = require('../controllers/auth');
 // Add to cart
 router.post('/add', authController.isLoggedIn, (req, res) => {
   const userId = req.user.id;
-  const { productId, quantity, price, variantId } = req.body;
+  const { productId, quantity, variantId } = req.body;
 
-  const checkSql = 'SELECT * FROM cart_items WHERE user_id = ? AND product_id = ? AND variant_id = ?';
-  db.query(checkSql, [userId, productId, variantId], (err, result) => {
-    if (err) return res.status(500).json({ success: false, error: err });
+  // 🔒 1. Check available stock
+  const stockSql = 'SELECT stock FROM product_variants WHERE id = ?';
 
-    if (result.length > 0) {
-      const updateSql = 'UPDATE cart_items SET quantity = quantity + ? WHERE id = ?';
-      db.query(updateSql, [quantity, result[0].id], (err2) => {
-        if (err2) return res.status(500).json({ success: false, error: err2 });
-        res.json({ success: true });
-      });
-    } else {
-      const insertSql = 'INSERT INTO cart_items (user_id, product_id, variant_id, quantity) VALUES (?, ?, ?, ?)';
-      db.query(insertSql, [userId, productId, variantId, quantity], (err3) => {
-        if (err3) return res.status(500).json({ success: false, error: err3 });
-        res.json({ success: true });
+  db.query(stockSql, [variantId], (err, stockResult) => {
+    if (err || stockResult.length === 0) {
+      return res.status(500).json({ success: false, message: 'Variant not found' });
+    }
+
+    const availableStock = stockResult[0].stock;
+
+    if (Number(quantity) > availableStock) {
+      return res.json({
+        success: false,
+        message: `Only ${availableStock} sacks available`
       });
     }
+
+    // 🔒 2. Check if already in cart
+    const checkSql = `
+      SELECT * FROM cart_items 
+      WHERE user_id = ? AND product_id = ? AND variant_id = ?
+    `;
+
+    db.query(checkSql, [userId, productId, variantId], (err2, result) => {
+      if (err2) return res.status(500).json({ success: false });
+
+      if (result.length > 0) {
+
+        const newQuantity = result[0].quantity + Number(quantity);
+
+        if (newQuantity > availableStock) {
+          return res.json({
+            success: false,
+            message: `Only ${availableStock} sacks available`
+          });
+        }
+
+        const updateSql = 'UPDATE cart_items SET quantity = ? WHERE id = ?';
+
+        db.query(updateSql, [newQuantity, result[0].id], (err3) => {
+          if (err3) return res.status(500).json({ success: false });
+          res.json({ success: true });
+        });
+
+      } else {
+
+        const insertSql = `
+          INSERT INTO cart_items (user_id, product_id, variant_id, quantity)
+          VALUES (?, ?, ?, ?)
+        `;
+
+        db.query(insertSql, [userId, productId, variantId, quantity], (err4) => {
+          if (err4) return res.status(500).json({ success: false });
+          res.json({ success: true });
+        });
+
+      }
+    });
+
   });
 });
 

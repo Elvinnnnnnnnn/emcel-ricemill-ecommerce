@@ -33,7 +33,10 @@ function getProductsWithVariants(callback) {
     `;
 
     db.query(sql, (err, rows) => {
-        if (err) return callback(err);
+        if (err) {
+            console.error("PRODUCT QUERY ERROR:", err);
+            return callback(err);
+        }
 
         const productsMap = {};
 
@@ -73,18 +76,20 @@ router.get('/', authController.isLoggedIn, (req, res) => {
     const userId = req.user ? req.user.id : null;
 
     getProductsWithVariants((err, products) => {
-        if (err) return res.status(500).send("Database error");
+    if (err) {
+        console.error("HOME QUERY ERROR:", err);
+        return res.status(500).send("Database error");
+    }
 
-        if (!userId) {
-            return res.render('index', {
-                user: null,
-                products,
-                currentOrder: null,
-                addresses: [],
-                orders: []
-            });
-        }
-
+    if (!userId) {
+        return res.render('index', {
+            user: null,
+            products,
+            currentOrder: null,
+            addresses: [],
+            orders: []
+        });
+    }
         // Fetch orders
         const ordersSql = `
             SELECT 
@@ -109,7 +114,10 @@ router.get('/', authController.isLoggedIn, (req, res) => {
             if (orderIds.length === 0) {
                 // No orders
                 db.query(addressesSql, [userId], (err, addressesResult) => {
-                    if (err) return res.status(500).send("Address error");
+                    if (err) {
+                        console.error("ADDRESS ERROR:", err);
+                        return res.status(500).send("Address error");
+                    }
                     res.render('index', {
                         user: req.user,
                         products,
@@ -141,7 +149,10 @@ router.get('/', authController.isLoggedIn, (req, res) => {
                     });
 
                     db.query(addressesSql, [userId], (err, addressesResult) => {
-                        if (err) return res.status(500).send("Address error");
+                        if (err) {
+                            console.error("ADDRESS ERROR:", err);
+                            return res.status(500).send("Address error");
+                        }
 
                         const currentOrder = ordersResult.length ? ordersResult[0] : null;
 
@@ -216,7 +227,10 @@ router.get('/checkout', authController.isLoggedIn, (req, res) => {
         const address = addressResult[0] || {};
 
         db.query(cartSql, [userId], (err, cartItems) => {
-            if (err) return res.status(500).send('Error loading cart items');
+            if (err) {
+                console.error("CART ERROR:", err);
+                return res.status(500).send("Error loading cart items");
+            }
 
             cartItems = cartItems.map(item => ({
                 ...item,
@@ -257,7 +271,10 @@ router.get('/checkout', authController.isLoggedIn, (req, res) => {
 router.get('/delivery', authController.isLoggedIn, authController.protect, (req, res) => {
     const userId = req.user.id;
     db.query('SELECT * FROM shipping_details WHERE user_id = ?', [userId], (err, results) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
+        if (err) {
+            console.error("DELIVERY ERROR:", err);
+            return res.status(500).json({ error: 'Database error' });
+        }
         res.json(results);
     });
 });
@@ -270,7 +287,10 @@ router.post('/delivery', authController.isLoggedIn, authController.protect, (req
                  VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     db.query(sql, [firstname, lastname, address, city, region, postal, phone, userId], (err, result) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
+        if (err) {
+            console.error("DELIVERY ERROR:", err);
+            return res.status(500).json({ error: 'Database error' });
+        }
         res.json({ success: true });
     });
 });

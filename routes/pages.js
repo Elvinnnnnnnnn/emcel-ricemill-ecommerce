@@ -250,19 +250,34 @@ router.get('/checkout', authController.isLoggedIn, (req, res) => {
 }
 
 
-           const subtotal = cartItems.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-            );
+           // Calculate subtotal
+const subtotal = cartItems.reduce(
+  (sum, item) => sum + item.price * item.quantity,
+  0
+);
 
-            const SHIPPING_FEE = 50;
-            const total = subtotal + SHIPPING_FEE;
+// Count total quantity
+const totalQuantity = cartItems.reduce(
+  (sum, item) => sum + item.quantity,
+  0
+);
+
+            // Shipping logic
+            let shipping = 0;
+
+            if (totalQuantity >= 1 && totalQuantity <= 4) {
+            shipping = 100;
+            } else if (totalQuantity >= 5) {
+            shipping = 0;
+            }
+
+            const total = subtotal + shipping;
 
             res.render('checkout', {
             user: req.user,
             cartItems,
             subtotal,
-            shipping: SHIPPING_FEE,
+            shipping,
             total,
             address
             });

@@ -93,7 +93,20 @@ router.post('/checkout', authController.isLoggedIn, (req, res) => {
         function continueOrder(totalAmount) {
 
             // ===== SHIPPING =====
-            const SHIPPING_FEE = 50;
+            // Count total quantity
+            const totalQuantity = cartItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0
+            );
+
+            // Shipping logic
+            let SHIPPING_FEE = 0;
+
+            if (totalQuantity >= 1 && totalQuantity <= 4) {
+            SHIPPING_FEE = 100;
+            } else if (totalQuantity >= 5) {
+            SHIPPING_FEE = 0;
+            }
 
             const subtotal = totalAmount;
             const finalTotal = subtotal + SHIPPING_FEE;

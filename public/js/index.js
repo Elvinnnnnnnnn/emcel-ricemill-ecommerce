@@ -221,7 +221,22 @@ document.addEventListener("DOMContentLoaded", () => {
         cartItems.appendChild(li);
       });
 
-      const SHIPPING_FEE = 50;
+      // Count total quantity
+      let totalQuantity = 0;
+
+      cart.forEach(item => {
+        totalQuantity += item.quantity;
+      });
+
+      // Shipping logic
+      let SHIPPING_FEE = 0;
+
+      if (totalQuantity >= 1 && totalQuantity <= 4) {
+        SHIPPING_FEE = 100;
+      } else if (totalQuantity >= 5) {
+        SHIPPING_FEE = 0;
+      }
+
       const subtotal = total;
       const finalTotal = subtotal + SHIPPING_FEE;
 

@@ -17,6 +17,13 @@ router.post('/', authController.isLoggedIn, (req, res) => {
     phone
   } = req.body;
 
+   if (!region || region === "Select Region") {
+    return res.status(400).json({
+      success: false,
+      message: "Please select a valid region"
+    });
+  }
+
   // Insert into shipping_details, without order_id (we'll set that later if needed)
   const sql = `
     INSERT INTO shipping_details

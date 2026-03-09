@@ -81,9 +81,6 @@ router.get('/', authController.isLoggedIn, (req, res) => {
         return res.status(500).send("Database error");
     }
 
-    console.log("PRODUCTS:", products);
-    console.log("PRODUCT COUNT:", products ? products.length : "undefined");
-
     if (!userId) {
         return res.render('index', {
             user: null,
@@ -100,9 +97,12 @@ router.get('/', authController.isLoggedIn, (req, res) => {
                 o.status,
                 o.estimated_delivery,
                 o.total_amount,
-                o.shipping_fee
+                o.shipping_fee,
+                o.created_at
             FROM orders o
-        `;
+            WHERE o.user_id = ?
+            ORDER BY o.created_at DESC
+        `
 
         const addressesSql = `SELECT * FROM shipping_details WHERE user_id = ?`;
 
@@ -157,7 +157,41 @@ router.get('/', authController.isLoggedIn, (req, res) => {
                             return res.status(500).send("Address error");
                         }
 
-                        const currentOrder = ordersResult.length ? ordersResult[0] : null;
+                        const activeOrders = ordersResult.filter(o =>
+                        o.status !== 'delivered' && o.status !== 'cancelled'
+                        )
+
+                        const currentOrder = activeOrders.length ? activeOrders[0] : null
+
+                        if (!currentOrder) {
+                        return res.render('index', {
+                            user: req.user,
+                            products,
+                            currentOrder: null,
+                            addresses: addressesResult || [],
+                            orders: ordersResult || []
+                        })
+                        }
+
+                        const itemsSql = `
+                        SELECT 
+                        oi.quantity,
+                        p.name,
+                        v.kilograms
+                        FROM order_items oi
+                        JOIN products p ON oi.product_id = p.id
+                        LEFT JOIN product_variants v ON oi.variant_id = v.id
+                        WHERE oi.order_id = ?
+                        `
+
+                        db.query(itemsSql, [currentOrder.id], (err, items) => {
+
+                        if (err) {
+                            console.log(err)
+                            items = []
+                        }
+
+                        currentOrder.items = items
 
                         res.render('index', {
                             user: req.user,
@@ -165,7 +199,9 @@ router.get('/', authController.isLoggedIn, (req, res) => {
                             currentOrder,
                             addresses: addressesResult || [],
                             orders: ordersResult || []
-                        });
+                        })
+
+                        })
                     });
                 }
             );
@@ -249,35 +285,69 @@ router.get('/checkout', authController.isLoggedIn, (req, res) => {
                 return res.status(400).send("Cart items have invalid prices");
 }
 
+            // ===== CALCULATE SUBTOTAL =====
+            const subtotal = cartItems.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+            );
 
-           // Calculate subtotal
-const subtotal = cartItems.reduce(
-  (sum, item) => sum + item.price * item.quantity,
-  0
-);
+            // ===== SHIPPING BASED ON REGION =====
+            const city = (address.city || "").toLowerCase().trim();
+            const region = address.region || "";
 
-// Count total quantity
-const totalQuantity = cartItems.reduce(
-  (sum, item) => sum + item.quantity,
-  0
-);
+            let SHIPPING_FEE = 0;
 
-            // Shipping logic
-            let shipping = 0;
-
-            if (totalQuantity >= 1 && totalQuantity <= 4) {
-            shipping = 100;
-            } else if (totalQuantity >= 5) {
-            shipping = 0;
+            if (
+            city.includes("morong") ||
+            city.includes("tanay") ||
+            city.includes("baras") ||
+            city.includes("binangonan") ||
+            city.includes("cardona") ||
+            city.includes("teresa") ||
+            city.includes("pililla") ||
+            city.includes("jalajala") ||
+            city.includes("rizal")
+            ) {
+            SHIPPING_FEE = 60;
+            }
+            else if (
+            city.includes("pasig") ||
+            city.includes("marikina") ||
+            city.includes("quezon city") ||
+            city.includes("manila") ||
+            city.includes("mandaluyong") ||
+            city.includes("taguig") ||
+            city.includes("makati")
+            ) {
+            SHIPPING_FEE = 100;
+            }
+            else if (
+            city.includes("bulacan") ||
+            city.includes("laguna") ||
+            city.includes("cavite")
+            ) {
+            SHIPPING_FEE = 140;
+            }
+            else if (
+            city.includes("ilocos") ||
+            city.includes("pangasinan") ||
+            city.includes("tarlac") ||
+            city.includes("bataan") ||
+            city.includes("zambales")
+            ) {
+            SHIPPING_FEE = 180;
+            }
+            else {
+            SHIPPING_FEE = 220;
             }
 
-            const total = subtotal + shipping;
+            const total = subtotal + SHIPPING_FEE;
 
             res.render('checkout', {
             user: req.user,
             cartItems,
             subtotal,
-            shipping,
+            shipping: SHIPPING_FEE,
             total,
             address
             });

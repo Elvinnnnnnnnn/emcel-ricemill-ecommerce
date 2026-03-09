@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>EMCEL RICEMILL</title>
+		<title>Emcel RiceMill</title>
 		<link rel="stylesheet" href="/css/index.css">
 		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -68,29 +68,67 @@
 					</div>
 
 					<div class="current-order-container">
+
 						<% if (currentOrder) { %>
+
 						<div class="current-order-card">
-							<h4>Current Order #<%= currentOrder.id %></h4>
 
-							<p class="status">
-								<% if (currentOrder.status === 'pending') { %>
-									🕒 Pending Approval
-								<% } else if (currentOrder.status === 'processing') { %>
-									📦 Processing Order
-								<% } else if (currentOrder.status === 'out_for_delivery') { %>
-									🚚 Out for Delivery
-								<% } else if (currentOrder.status === 'delivered') { %>
-									✅ Delivered
-								<% } else { %>
-									❌ Cancelled
-								<% } %>
-							</p>
-
-							<% if (currentOrder.estimated_delivery) { %>
-								<p>Est: <%= currentOrder.estimated_delivery %></p>
-							<% } %>
+						<div class="current-order-header">
+						<i class="fa-solid fa-truck-fast"></i>
+						<span>Current Order</span>
 						</div>
+
+						<div class="current-order-status">
+
+						<% if (currentOrder.status === 'pending') { %>
+						<span class="status-badge pending">Pending Approval</span>
+
+						<% } else if (currentOrder.status === 'processing') { %>
+						<span class="status-badge processing">Preparing Order</span>
+
+						<% } else if (currentOrder.status === 'out_for_delivery') { %>
+						<span class="status-badge delivery">Out for Delivery</span>
+
+						<% } else if (currentOrder.status === 'delivered') { %>
+						<span class="status-badge delivered">Delivered</span>
+
+						<% } else { %>
+						<span class="status-badge cancelled">Cancelled</span>
 						<% } %>
+
+						</div>
+
+						<div class="current-order-products">
+
+						<% currentOrder.items.forEach(item => { %>
+
+						<div class="order-product-row">
+						<span class="product-name">
+						<%= item.name %> (<%= item.kilograms %>kg)
+						</span>
+
+						<span class="product-qty">
+						x<%= item.quantity %>
+						</span>
+						</div>
+
+						<% }) %>
+
+						</div>
+
+						<% if (currentOrder.estimated_delivery) { %>
+
+						<p class="delivery-time">
+						Estimated Delivery  
+						<span><%= currentOrder.estimated_delivery %></span>
+						</p>
+
+						<% } %>
+
+						</div>
+
+						<% } %>
+
 					</div>
 
 					<div class="orderhistory-container">
@@ -126,22 +164,7 @@
 			<!-- SCROLLABLE AREA -->
 			<div class="cart-items-wrapper">
 				<ul id="cartItems">
-				<li>
-					<div class="items-container">
-					<div>
-						<img class="product-image" src="/Photos/sakura.png" alt="Sakura Pink">
-					</div>
-					<div class="items-content">
-						<p class="item-name">Sakura Pink</p>
-						<p class="item-value">₱890</p>
-						<p class="item-kg">840/25kg</p>
-					</div>
-					<div class="quantity-content">
-						<input class="quantity-cart" type="number" min="1" value="1">
-						<p>Remove</p>
-					</div>
-					</div>
-				</li>
+		
 				<!-- more items here -->
 				</ul>
 			</div>
@@ -149,14 +172,32 @@
 			<!-- STICKY FOOTER -->
 			<div class="cart-total">
 
-				<p>Subtotal: ₱<span id="cartSubtotal">0</span></p>
-				<p>Shipping: ₱<span id="cartShipping">50</span></p>
-				<p><strong>Total: ₱<span id="cartTotal">0</span></strong></p>
+				<div class="cart-summary-row">
+					<span class="cart-label">Subtotal</span>
+					<span class="cart-price">
+					<span class="peso">₱</span>
+					<span id="cartSubtotal">0</span>
+					</span>
+				</div>
+
+				<div class="cart-summary-row">
+					<span class="cart-label">Shipping</span>
+					<span class="cart-price">
+					<span class="peso">₱</span>
+					<span id="cartShipping">50</span>
+					</span>
+				</div>
+
+				<div class="cart-summary-row cart-total-row">
+					<span class="cart-label">Total</span>
+					<span class="cart-price">
+					<span class="peso">₱</span>
+					<span id="cartTotal">0</span>
+					</span>
+				</div>
 
 				<div class="checkout-container">
-					<button id="checkoutBtn">
-						<a class="checkout-text" href="/checkout">Checkout</a>
-					</button>
+					<a href="/checkout" id="checkoutBtn">Checkout</a>
 				</div>
 
 			</div>
@@ -167,10 +208,15 @@
 		<section id="welcome">
 			<div class="main_container">
 				<div class="welcome_container">
-					<h1>W E L C O M E</h1>
-					<h3>to eMcEL Rice Mill</h3>
-					<p>To offer quality Products to the people with the lowest possible prices, the best available selection, and the utmost convenience.</p>
-					<button>Let's Start</button>
+				<h1>W E L C O M E</h1>
+				<h3>to eMcEL Rice Mill</h3>
+				<p>
+					To offer quality Products to the people with the lowest possible prices,
+					the best available selection, and the utmost convenience.
+				</p>
+
+				<a href="#products" class="start-btn">Let's Start</a>
+
 				</div>
 			</div>
 		</section>
@@ -233,42 +279,47 @@
 		   <div class="product-container">
 				<% products.forEach(product => { %>
 					<div class="product-card" data-product-id="<%= product.id %>">
-						<img src="/product_photos/<%= product.image %>" alt="<%= product.name %>" class="product-image">
-						<h3 class="product-name"><%= product.name %></h3>
 
-						<div class="rating">
-							<% for(let i = 1; i <= 5; i++) { %>
-								<i class="fa-solid fa-star <%= i <= Math.round(product.avg_rating) ? 'active' : '' %>"></i>
-							<% } %>
-							<span class="rating-text">
-								(<%= product.rating_count %>)
-							</span>
-						</div>
+					<div class="product-image-box">
+						<img 
+						src="/product_photos/<%= product.image %>" 
+						alt="<%= product.name %>" 
+						class="product-image">
+					</div>
 
-						<h2 class="product-value">
+					<h3 class="product-name"><%= product.name %></h3>
+
+					<div class="rating">
+						<% for(let i = 1; i <= 5; i++) { %>
+						<i class="fa-solid fa-star <%= i <= Math.round(product.avg_rating) ? 'active' : '' %>"></i>
+						<% } %>
+						<span class="rating-text">(<%= product.rating_count %>)</span>
+					</div>
+
+					<h2 class="product-value">
 						₱<%= Number(product.variants?.[0]?.price || 0).toLocaleString() %>
-						</h2>
+					</h2>
 
-						<p class="product-description">
-							High-quality rice, perfect for daily meals.
-						</p>
+					<p class="product-description">
+						High-quality rice, perfect for daily meals.
+					</p>
 
-						<!-- BUY BUTTON: includes main product info + first variant fallback -->
-						<button class="buy-button"
-							type="button"
-							data-id="<%= product.id %>"
-							data-name="<%= product.name %>"
-							data-description="<%= product.description %>"
-							data-image="/product_photos/<%= product.image %>"
-							data-price="<%= product.variants && product.variants.length ? product.variants[0].price : 0 %>"
-							data-kg="<%= product.variants && product.variants.length ? product.variants[0].kilograms : '' %>"
-							data-stock="<%= product.variants && product.variants.length ? product.variants[0].stock : 0 %>">
+					<button class="buy-button"
+						type="button"
+						data-id="<%= product.id %>"
+						data-name="<%= product.name %>"
+						data-description="<%= product.description %>"
+						data-image="/product_photos/<%= product.image %>"
+						data-price="<%= product.variants?.[0]?.price || 0 %>"
+						data-kg="<%= product.variants?.[0]?.kilograms || '' %>"
+						data-stock="<%= product.variants?.[0]?.stock || 0 %>">
 						Buy Now
-						</button>
+					</button>
+
 					</div>
 					<% }) %>
 
-		   </div>
+		   	</div>
 
 			<div id="product-modal" class="modal">
 				<div class="modal-content">
@@ -406,7 +457,9 @@
 						<p class="name"><%= address.firstname %> <%= address.lastname %></p>
 						<p class="address"><%= address.address %>, <%= address.city %>, <%= address.region %></p>
 						<p class="phone"><%= address.phone %></p>
+
 						<button class="edit-address" data-id="<%= address.id %>">Edit</button>
+						<button class="delete-address" data-id="<%= address.id %>">Delete</button>
 					</div>
 				<% }) %>
 			<% } else { %>
@@ -414,7 +467,10 @@
 			<% } %>
 		</div>
 
-		<div id="new-address-form" style="display: none; margin-top: 20px;">
+		<div id="new-address-form" style="display: none; margin-top: 20px; padding-top: 20px; position:relative;">
+
+			<span id="closeAddressForm" class="close-address-form">&times;</span>
+
 			<input type="text" id="firstname" placeholder="First Name" />
 			<input type="text" id="lastname" placeholder="Last Name" />
 			<input type="text" id="address" placeholder="Address" />
@@ -423,6 +479,7 @@
 			<input type="text" id="postal" placeholder="Postal Code" />
 			<input type="text" id="phone" placeholder="Phone" />
 			<button id="save-address">Save Address</button>
+
 		</div>
 
 	<button class="add-new-address">+ Add New Address</button>

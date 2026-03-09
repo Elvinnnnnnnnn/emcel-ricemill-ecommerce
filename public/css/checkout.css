@@ -294,6 +294,129 @@ select{
   background: #dc3545;
 }
 
+/* ORDER CARD */
+
+.order-card{
+  background:white;
+  border-radius:10px;
+  padding:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.order-title{
+  font-size:20px;
+  font-weight:600;
+  margin-bottom:20px;
+}
+
+/* ORDER ITEM */
+
+.order-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.order-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.product-image{
+  width:55px;
+  height:55px;
+  object-fit:contain;
+  background:#f5f5f5;
+  border-radius:6px;
+  padding:4px;
+}
+
+.order-info{
+  display:flex;
+  flex-direction:column;
+}
+
+.product-name{
+  font-size:14px;
+  font-weight:600;
+}
+
+.product-variant{
+  font-size:12px;
+  color:#777;
+}
+
+/* PRICE */
+
+.order-right{
+  font-size:15px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+}
+
+.peso{
+  font-family:sans-serif;
+  font-weight:700;
+  margin-right:2px;
+}
+
+/* DIVIDER */
+
+.order-divider{
+  border-top:1px solid #eee;
+  margin:15px 0;
+}
+
+/* SUMMARY ROW */
+
+.order-row{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:8px;
+  font-size:14px;
+}
+
+/* TOTAL */
+
+.order-total{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid #ddd;
+  font-size:18px;
+  font-weight:700;
+  color:#8A8F01;
+}
+
+/* CHECKOUT BUTTON */
+
+#checkoutBtn{
+  width:100%;
+  margin-top:20px;
+  padding:14px;
+  border:none;
+  border-radius:6px;
+  background:#8A8F01;
+  color:white;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background 0.2s;
+}
+
+#checkoutBtn:hover{
+  background:#616402;
+}
+
+.product-qty{
+  font-size:12px;
+  color:#666;
+}
+
 
 /* ========================= */
 /* RESPONSIVE - CHECKOUT */

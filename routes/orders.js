@@ -92,39 +92,125 @@ router.post('/checkout', authController.isLoggedIn, (req, res) => {
 
         function continueOrder(totalAmount) {
 
-            // ===== SHIPPING =====
-            // Count total quantity
-            const totalQuantity = cartItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-            );
+        const addressSql = `
+            SELECT city
+            FROM shipping_details
+            WHERE user_id = ?
+            ORDER BY id DESC
+            LIMIT 1
+        `;
 
-            // Shipping logic
+        db.query(addressSql, [userId], (addrErr, addrResult) => {
+
+            if (addrErr || addrResult.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Delivery address not found'
+                });
+            }
+
+            const city = (addrResult[0].city || "").toLowerCase();
             let SHIPPING_FEE = 0;
 
-            if (totalQuantity >= 1 && totalQuantity <= 4) {
+            if (
+            city.includes("morong") ||
+            city.includes("tanay") ||
+            city.includes("baras") ||
+            city.includes("binangonan") ||
+            city.includes("cardona") ||
+            city.includes("teresa") ||
+            city.includes("pililla") ||
+            city.includes("jalajala") ||
+            city.includes("rizal")
+            ) {
+            SHIPPING_FEE = 60;
+            }
+            else if (
+            city.includes("pasig") ||
+            city.includes("marikina") ||
+            city.includes("quezon city") ||
+            city.includes("manila") ||
+            city.includes("mandaluyong") ||
+            city.includes("taguig") ||
+            city.includes("makati")
+            ) {
             SHIPPING_FEE = 100;
-            } else if (totalQuantity >= 5) {
-            SHIPPING_FEE = 0;
+            }
+            else if (
+            city.includes("bulacan") ||
+            city.includes("laguna") ||
+            city.includes("cavite")
+            ) {
+            SHIPPING_FEE = 140;
+            }
+            else if (
+            city.includes("ilocos") ||
+            city.includes("pangasinan") ||
+            city.includes("tarlac") ||
+            city.includes("bataan") ||
+            city.includes("zambales")
+            ) {
+            SHIPPING_FEE = 180;
+            }
+            else {
+            SHIPPING_FEE = 220;
             }
 
             const subtotal = totalAmount;
             const finalTotal = subtotal + SHIPPING_FEE;
 
-            // 3️⃣ ESTIMATED DELIVERY
-            const now = new Date();
-            const delivery = new Date(now);
-            delivery.setHours(now.getHours() + 5);
+            // ===== DELIVERY ESTIMATION =====
+            const now = new Date()
+            const delivery = new Date(now)
+
+            const isRizal =
+            city.includes("morong") ||
+            city.includes("tanay") ||
+            city.includes("baras") ||
+            city.includes("binangonan") ||
+            city.includes("cardona") ||
+            city.includes("teresa") ||
+            city.includes("pililla") ||
+            city.includes("jalajala") ||
+            city.includes("rizal")
+
+            const isMetro =
+            city.includes("pasig") ||
+            city.includes("marikina") ||
+            city.includes("quezon city") ||
+            city.includes("manila") ||
+            city.includes("mandaluyong") ||
+            city.includes("taguig") ||
+            city.includes("makati")
+
+            if (isRizal || isMetro) {
+
+                // Same day delivery if before 2 PM
+                if (now.getHours() < 14) {
+                    delivery.setHours(now.getHours() + 5)
+                } 
+                else {
+                    delivery.setDate(delivery.getDate() + 1)
+                    delivery.setHours(9, 0, 0, 0)
+                }
+
+            }
+            else {
+
+                // Provincial delivery
+                delivery.setDate(delivery.getDate() + 2)
+                delivery.setHours(9, 0, 0, 0)
+
+            }
 
             const estimatedDelivery = delivery.toLocaleString('en-US', {
-                weekday: 'long',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+            })
 
-            // 4️⃣ INSERT ORDER
             const orderSql = `
                 INSERT INTO orders
                 (user_id, payment, total_amount, shipping_fee, status, estimated_delivery, created_at)
@@ -209,7 +295,9 @@ router.post('/checkout', authController.isLoggedIn, (req, res) => {
 
             });
 
-        }
+        });
+
+    }
 
     });
 

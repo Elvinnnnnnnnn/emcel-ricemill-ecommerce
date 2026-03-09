@@ -25,6 +25,57 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
+  document.addEventListener('click', (e) => {
+
+    if (
+      cartContainer.classList.contains('show') &&
+      !cartContainer.contains(e.target) &&
+      !cartIcon.contains(e.target)
+    ) {
+      cartContainer.classList.remove('show')
+    }
+
+  })
+
+  document.addEventListener('click', (e) => {
+
+    if (
+      deliveryPanel &&
+      deliveryPanel.classList.contains('active') &&
+      !deliveryPanel.contains(e.target) &&
+      !deliveryBtn.contains(e.target)
+    ) {
+      deliveryPanel.classList.remove('active')
+    }
+
+    if (
+      orderHistoryPanel &&
+      orderHistoryPanel.classList.contains('active') &&
+      !orderHistoryPanel.contains(e.target) &&
+      !orderHistoryBtn.contains(e.target)
+    ) {
+      orderHistoryPanel.classList.remove('active')
+    }
+
+    if (
+      settingsPanel &&
+      settingsPanel.classList.contains('active') &&
+      !settingsPanel.contains(e.target) &&
+      !settingsContainer.contains(e.target)
+    ) {
+      settingsPanel.classList.remove('active')
+    }
+
+  })
+
+  const closeAddressForm = document.getElementById('closeAddressForm')
+  const addressForm = document.getElementById('new-address-form')
+
+  if(closeAddressForm && addressForm){
+    closeAddressForm.addEventListener('click', () => {
+      addressForm.style.display = 'none'
+    })
+  }
 
   const cartItems = document.getElementById('cartItems');
   const cartTotal = document.getElementById('cartTotal');
@@ -190,51 +241,112 @@ document.addEventListener("DOMContentLoaded", () => {
         total += item.price * item.quantity;
 
         const li = document.createElement('li');
+
         li.innerHTML = `
-          <div class="items-container">
-            <div>
-              <img class="cart-checkout-image"
-                src="/product_photos/${item.image}"
-                alt="${item.name}">
+          <div class="cart-item">
+
+            <div class="cart-left">
+              <div class="cart-img-box">
+                <img
+                  class="cart-product-img"
+                  src="/product_photos/${item.image}"
+                  alt="${item.name}"
+                >
+              </div>
+
+              <div class="cart-product-info">
+                <p class="cart-product-name">
+                  ${item.name} ${item.variant ? '(' + item.variant + ')' : ''}
+                </p>
+
+                <p class="cart-product-price">
+                  ₱${Number(item.price).toLocaleString()}
+                </p>
+              </div>
             </div>
-            <div class="items-content">
-              <p class="item-name">
-                ${item.name} ${item.variant ? '(' + item.variant + ')' : ''}
-              </p>
-              <p class="item-value">
-                ₱${Number(item.price).toLocaleString()}
-              </p>
-            </div>
-            <div class="quantity-content">
-              <input class="quantity-cart"
+
+            <div class="cart-right">
+              <input
+                class="cart-qty"
                 type="number"
                 data-id="${item.cartId}"
                 value="${item.quantity}"
-                min="1">
-              <p class="remove-item"
-                data-id="${item.cartId}">
+                min="1"
+              >
+
+              <button
+                class="cart-remove remove-item"
+                data-id="${item.cartId}"
+              >
                 Remove
-              </p>
+              </button>
             </div>
+
           </div>
         `;
         cartItems.appendChild(li);
       });
 
       // Count total quantity
-      let totalQuantity = 0;
+     let totalQuantity = 0;
 
       cart.forEach(item => {
         totalQuantity += item.quantity;
       });
 
-      // Shipping logic
       let SHIPPING_FEE = 0;
 
-      if (totalQuantity >= 1 && totalQuantity <= 4) {
-        SHIPPING_FEE = 100;
-      } else if (totalQuantity >= 5) {
-        SHIPPING_FEE = 0;
+      const resAddress = await fetch('/delivery', { credentials: 'include' });
+      const addresses = await resAddress.json();
+
+      let city = "";
+
+      if (addresses.length > 0) {
+        city = (addresses[0].city || "").toLowerCase().trim();
+      }
+
+      if (
+      city.includes("morong") ||
+      city.includes("tanay") ||
+      city.includes("baras") ||
+      city.includes("binangonan") ||
+      city.includes("cardona") ||
+      city.includes("teresa") ||
+      city.includes("pililla") ||
+      city.includes("jalajala") ||
+      city.includes("rizal")
+      ) {
+      SHIPPING_FEE = 60;
+      }
+      else if (
+      city.includes("pasig") ||
+      city.includes("marikina") ||
+      city.includes("quezon city") ||
+      city.includes("manila") ||
+      city.includes("mandaluyong") ||
+      city.includes("taguig") ||
+      city.includes("makati")
+      ) {
+      SHIPPING_FEE = 100;
+      }
+      else if (
+      city.includes("bulacan") ||
+      city.includes("laguna") ||
+      city.includes("cavite")
+      ) {
+      SHIPPING_FEE = 140;
+      }
+      else if (
+      city.includes("ilocos") ||
+      city.includes("pangasinan") ||
+      city.includes("tarlac") ||
+      city.includes("bataan") ||
+      city.includes("zambales")
+      ) {
+      SHIPPING_FEE = 180;
+      }
+      else {
+      SHIPPING_FEE = 220;
       }
 
       const subtotal = total;
@@ -250,36 +362,92 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function setupCartItemListeners() {
-    document.querySelectorAll('.remove-item').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        await fetch(`/cart/${btn.dataset.id}`, { method: 'DELETE' });
-        if (document.body.dataset.loggedIn === "true") {
-          loadCart();
-        }
-      });
-    });
-
-    document.querySelectorAll('.quantity-cart').forEach(input => {
-      input.addEventListener('change', async () => {
-        const quantity = Number(input.value);
-        await fetch(`/cart/${input.dataset.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ quantity })
-        });
-        if (document.body.dataset.loggedIn === "true") {
-          loadCart();
-        }
-      });
-    });
-  }
-
     if (document.body.dataset.loggedIn === "true") {
       loadCart();
     }
 });
 
+function setupCartItemListeners() {
+
+  document.querySelectorAll('.remove-item').forEach(btn => {
+
+    btn.addEventListener('click', async () => {
+
+      await fetch(`/cart/${btn.dataset.id}`, {
+        method: 'DELETE'
+      });
+
+      if (document.body.dataset.loggedIn === "true") {
+        loadCart();
+      }
+
+    });
+
+  });
+
+  document.querySelectorAll('.cart-qty').forEach(input => {
+
+    input.addEventListener('input', () => {
+
+      recalculateCartTotals();
+
+    });
+
+    input.addEventListener('change', async () => {
+
+      const quantity = Number(input.value);
+      const cartId = input.dataset.id;
+
+      const res = await fetch(`/cart/${cartId}`, {
+        method:'PATCH',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ quantity })
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+
+        showToast(data.message || 'Stock exceeded','error');
+
+        if (data.available_stock) {
+          input.value = data.available_stock;
+        }
+
+        recalculateCartTotals();
+        return;
+
+      }
+
+    });
+
+  });
+
+}
+
+function recalculateCartTotals() {
+
+  let subtotal = 0;
+
+  document.querySelectorAll('.cart-item').forEach(item => {
+
+    const priceText = item.querySelector('.cart-product-price').textContent;
+    const price = Number(priceText.replace(/[₱,]/g,''));
+
+    const qty = Number(item.querySelector('.cart-qty').value);
+
+    subtotal += price * qty;
+
+  });
+
+  const shipping = Number(document.getElementById('cartShipping').textContent.replace(/,/g,''));
+
+  const total = subtotal + shipping;
+
+  document.getElementById('cartSubtotal').textContent = subtotal.toLocaleString();
+  document.getElementById('cartTotal').textContent = total.toLocaleString();
+
+}
 
 // ===== PROFILE DROPDOWN =====
 const profileIcon = document.getElementById('profileIcon');
@@ -388,12 +556,38 @@ function setupAddressButtons() {
     });
 
     document.querySelectorAll('.delete-address').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            if (!confirm('Delete this address?')) return;
-            const res = await fetch(`/delivery/${btn.dataset.id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) loadAddresses();
-        });
+      btn.onclick = async () => {
+
+
+        try {
+
+          const res = await fetch(`/delivery/${btn.dataset.id}`, {
+            method: 'DELETE'
+          });
+
+          const result = await res.json();
+
+          if (result.success) {
+
+            showToast('Address deleted successfully');
+
+            const card = btn.closest('.address-card');
+            if (card) card.remove();
+
+          } else {
+
+            showToast(result.message || 'Failed to delete address', 'error');
+
+          }
+
+        } catch (err) {
+
+          console.error(err);
+          showToast('Server error', 'error');
+
+        }
+
+      };
     });
 }
 
@@ -468,12 +662,38 @@ function setupAddressButtons() {
     });
 
     document.querySelectorAll('.delete-address').forEach(btn => {
-        btn.onclick = async () => {
-            if (!confirm('Delete this address?')) return;
-            const res = await fetch(`/delivery/${btn.dataset.id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) loadAddresses();
-        };
+      btn.onclick = async () => {
+
+
+        try {
+
+          const res = await fetch(`/delivery/${btn.dataset.id}`, {
+            method: 'DELETE'
+          });
+
+          const result = await res.json();
+
+          if (result.success) {
+
+            showToast('Address deleted successfully');
+
+            const card = btn.closest('.address-card');
+            if (card) card.remove();
+
+          } else {
+
+            showToast(result.message || 'Failed to delete address', 'error');
+
+          }
+
+        } catch (err) {
+
+          console.error(err);
+          showToast('Server error', 'error');
+
+        }
+
+      };
     });
 }
 
@@ -538,7 +758,7 @@ if (profilePicInput && profilePreview) {
 
 if (saveSettingsBtn) {
   saveSettingsBtn.addEventListener('click', async () => {
-    // your existing code hereconst formData = new FormData();
+    const formData = new FormData();
     const file = profilePicInput.files[0];
 
     if (file) {

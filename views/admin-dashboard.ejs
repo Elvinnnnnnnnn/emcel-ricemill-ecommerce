@@ -11,17 +11,17 @@
     <body>
         <div class="dashboard">
             <!-- Sidebar -->
-            <nav class="sidebar">
+           <nav class="sidebar">
                 <img src="../../Photos/Emcel logo backround removed.png" alt="Emcel Logo">
+
                 <ul>
-                    <li><a href="#">Overview</a></li>
+                    <li><a href="#overview">Overview</a></li>
                     <li><a href="#inventory">Inventory</a></li>
                     <li><a href="#orders">Orders</a></li>
                     <li><a href="#sales">Sales</a></li>
                     <li><a href="#users">Users</a></li>
                     <li><a href="#" id="openSettings">Settings</a></li>
                 </ul>
-
             </nav>
             
             <!-- Main Content -->
@@ -38,32 +38,49 @@
 
                 </header>
                 
-                <section class="metrics">
-                    <div class="card">
-                        <h3>Total Sales</h3>
-                        <p>₱<%= Number(totalSales).toLocaleString() %></p>
-                    </div>
-                    <div class="card">
-                        <h3>Active Users</h3>
-                         <p><%= activeUsers %></p>
-                    </div>
-                    <div class="card">
-                        <h3>Revenue</h3>
-                        <p>₱<%= Number(revenue).toLocaleString() %></p>
-                    </div>
-                  <div class="card" onclick="location.href='#orders'" style="cursor:pointer;">
-                    <h3>Pending Orders</h3>
-                    <p><%= pendingOrdersCount || 0 %></p>
-                  </div>
+               <section id="overview">
+
+                    <section class="metrics">
+
+                        <div class="card">
+                            <h3>Total Sales</h3>
+                            <p>₱<%= Number(totalSales).toLocaleString() %></p>
+                        </div>
+
+                        <div class="card">
+                            <h3>Active Users</h3>
+                            <p><%= activeUsers %></p>
+                        </div>
+
+                        <div class="card">
+                            <h3>Revenue</h3>
+                            <p>₱<%= Number(revenue).toLocaleString() %></p>
+                        </div>
+
+                        <div class="card" onclick="location.href='#orders'" style="cursor:pointer;">
+                            <h3>Pending Orders</h3>
+                            <p><%= pendingOrdersCount || 0 %></p>
+                        </div>
+
+                    </section>
 
                 </section>
-                
                 <!-- Inventory Monitoring (Kept Original + Added Product Management) -->
                 <section id="inventory" class="section">
                     <h2>Inventory Monitoring</h2>
 
+                <div class="inventory-card">
+
+                    <div class="inventory-header">
+                        <p class="inventory-subtitle">
+                            View current stock levels
+                        </p>
+                    </div>
+
                     <div class="inventory-scroll">
+
                         <table class="inventory-table">
+
                             <thead>
                                 <tr>
                                     <th>Item</th>
@@ -71,84 +88,229 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
+
                             <tbody>
+
                                 <% inventory.forEach(item => { %>
+
                                     <tr>
+
+                                        <td class="item-name">
+                                            <%= item.productName %>
+                                            <span class="item-weight">
+                                                <%= item.kilograms %>kg
+                                            </span>
+                                        </td>
+
+                                        <td class="stock-value">
+                                            <%= item.stock %>
+                                        </td>
+
                                         <td>
-                                            <%= item.productName %> (<%= item.kilograms %>kg)
+                                            <span class="status-badge <%= item.status %>">
+                                                <%= item.status.replace('-', ' ').toUpperCase() %>
+                                            </span>
                                         </td>
-                                        <td><%= item.stock %></td>
-                                        <td class="status <%= item.status %>">
-                                            <%= item.status.replace('-', ' ').toUpperCase() %>
-                                        </td>
+
                                     </tr>
+
                                 <% }) %>
+
                             </tbody>
+
                         </table>
+
                     </div>
 
+                </div>
 
-
-                    <h2>Product Management</h2>
 
                     <!-- Add Product Form -->
-                    <div class="add-product">
-                        <h3>Add New Product</h3>
-                            <form id="addProductForm" action="/admin/add-product" method="POST" enctype="multipart/form-data">
-                                <input type="text" name="name" placeholder="Product Name" required>
-                                <textarea name="description" placeholder="Description"></textarea>
-                                <input type="file" name="image" accept="image/*"> <br>
-                                <h4>Variants</h4> <br>
-                                <input type="number" name="stock[]" placeholder="Stock" required>
-                                <input class="price-input" type="number" name="price[]" placeholder="Price" required>
-                                <input class="kilograms-input" type="text" name="kilograms[]" placeholder="Kilograms (e.g. 25kg)" required> <br>
-                                <button type="button" id="add-variant-btn">Add Another Variant</button>
-                                <button type="submit" class="add-btn">Add Product</button>
-                            </form>
+                <div class="add-product">
+
+                     <div class="product-list-header">
+                        <h3>Product Management</h3>
+                        <p class="product-list-subtitle">
+                            Add New Product
+                        </p>
                     </div>
 
-                    <!-- Product List -->
-                   <h3 style="margin-top: 30px;">Product List</h3>
+                    <form
+                        id="addProductForm"
+                        action="/admin/add-product"
+                        method="POST"
+                        enctype="multipart/form-data"
+                    >
 
-                        <div class="product-scroll">
-                            <table class="product-table">
-                                <thead>
-                                    <tr>
-                                        <th>Image</th>
-                                        <th>Product</th>
-                                        <th>Price</th>
-                                        <th>Kilograms</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="productList">
-                                    <% products.forEach(product => { %>
-                                        <tr data-id="<%= product.id %>">
-                                            <td>
-                                                <img src="/product_photos/<%= product.image %>" 
-                                                    alt="<%= product.name %>" 
-                                                    class="product-image">
-                                            </td>
-                                            <td><%= product.name %></td>
-                                            <td>
-                                                <% product.prices.split(',').forEach((price, index) => { %>
-                                                    ₱<%= price.trim() %><%= (index < product.prices.split(',').length - 1) ? ', ' : '' %>
-                                                <% }) %>
-                                            </td>
-                                            <td><%= product.kilograms %>kg</td>
-                                            <td>
-                                                <button class="edit-btn">Edit</button>
-                                                <% if (product.is_active === 1) { %>
-                                                    <button class="archive-btn">Archive</button>
-                                                <% } else { %>
-                                                    <button class="unarchive-btn">Unarchive</button>
-                                                <% } %>
-                                            </td>
-                                        </tr>
-                                    <% }) %>
-                                </tbody>
-                            </table>
+                        <div class="product-basic">
+
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Product Name"
+                                required
+                            >
+
+                            <textarea
+                                name="description"
+                                placeholder="Description"
+                            ></textarea>
+
+                            <input
+                                type="file"
+                                name="image"
+                                accept="image/*"
+                            >
+
                         </div>
+
+
+                        <div class="variant-section">
+
+                            <h4>Variants</h4>
+
+                            <div class="variant-row">
+
+                                <input
+                                    type="number"
+                                    name="stock[]"
+                                    placeholder="Stock"
+                                    required
+                                >
+
+                                <input
+                                    class="price-input"
+                                    type="number"
+                                    name="price[]"
+                                    placeholder="Price"
+                                    required
+                                >
+
+                                <input
+                                    class="kilograms-input"
+                                    type="text"
+                                    name="kilograms[]"
+                                    placeholder="Kilograms (e.g. 25kg)"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="product-actions">
+
+                            <button
+                                type="button"
+                                id="add-variant-btn"
+                            >
+                                Add Another Variant
+                            </button>
+
+                            <button
+                                type="submit"
+                                class="add-btn"
+                            >
+                                Add Product
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                    <!-- Product List -->
+                   <div class="product-list-card">
+
+                    <div class="product-list-header">
+                        <h3>Product List</h3>
+                        <p class="product-list-subtitle">
+                            Manage existing products and variants
+                        </p>
+                    </div>
+
+                    <div class="product-scroll">
+
+                        <table class="product-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Kilograms</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="productList">
+
+                                <% products.forEach(product => { %>
+
+                                    <tr data-id="<%= product.id %>">
+
+                                        <td>
+                                            <img
+                                                src="/product_photos/<%= product.image %>"
+                                                alt="<%= product.name %>"
+                                                class="product-image"
+                                            >
+                                        </td>
+
+                                        <td class="product-name">
+                                            <%= product.name %>
+                                        </td>
+
+                                        <td class="product-price">
+
+                                            <% product.prices.split(',').forEach((price, index) => { %>
+
+                                                ₱<%= price.trim() %>
+                                                <%= (index < product.prices.split(',').length - 1) ? ', ' : '' %>
+
+                                            <% }) %>
+
+                                        </td>
+
+                                        <td class="product-weight">
+                                            <%= product.kilograms %>kg
+                                        </td>
+
+                                        <td class="product-actions">
+
+                                            <button class="edit-btn">
+                                                Edit
+                                            </button>
+
+                                            <% if (product.is_active === 1) { %>
+
+                                                <button class="archive-btn">
+                                                    Archive
+                                                </button>
+
+                                            <% } else { %>
+
+                                                <button class="unarchive-btn">
+                                                    Unarchive
+                                                </button>
+
+                                            <% } %>
+
+                                        </td>
+
+                                    </tr>
+
+                                <% }) %>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
 
                 </section>
 
@@ -164,11 +326,18 @@
                             <label for="productName">Product Name</label>
                             <input id="productName" type="text" name="name" placeholder="Product Name" required>
 
+                            <label for="productDescription">Description</label>
+                            <textarea
+                                id="productDescription"
+                                name="description"
+                                placeholder="Product Description"
+                                rows="3"
+                            ></textarea>
+
                             <!-- Container for dynamic variant inputs -->
                             <div class="variants-wrapper">
                                 <div id="variantInputs"></div>
                             </div>
-
 
                             <!-- Optional image update -->
                             <label for="productImage">Update Image (optional)</label>
@@ -181,73 +350,197 @@
 
                 
                 <!-- Order Handling -->
+                            <!-- ================= ORDER HANDLING ================= -->
+
                 <section id="orders" class="section">
-                    <h2>Order Handling</h2>
 
-                    <div class="order-list">
-                        <% pendingOrders.forEach(order => { %>
-                        <div class="order-item" data-id="<%= order.orderId %>">
+                    <div class="orders-card">
 
-                            <p>
-                            Order #<%= order.orderId %> -
-                            <%= order.firstname %> <%= order.lastname %> -
-                            <strong class="status-text">
-                                <%= order.status.toUpperCase() %>
-                            </strong>
-                            </p>
-
-                            <% if (order.status === 'pending') { %>
-                            <button class="order-btn approve-btn">Approve</button>
-                            <% } %>
-
-                            <% if (order.status === 'processing') { %>
-                            <button class="order-btn delivery-btn">Out for Delivery</button>
-                            <% } %>
-
-                            <% if (order.status === 'out_for_delivery') { %>
-                            <button class="order-btn delivered-btn">Mark as Delivered</button>
-                            <% } %>
-
-                            <button class="order-btn reject-btn">Cancel</button>
-
+                        <div class="orders-header">
+                            <h2>Order Handling</h2>
+                            <p class="orders-subtitle">Manage and track customer orders</p>
                         </div>
-                        <% }) %>
-                    </div>
-                    </section>
 
+                        <div class="orders-grid">
 
-                <!-- Order Tracking -->
-                <section class="section">
-                    <h2>Order Tracking</h2>
+                            <% pendingOrders.forEach(order => { %>
 
-                        <div class="tracking-scroll">
-                            <div class="tracking-list">
-                                <% allOrders.forEach(order => { %>
-                                    <div class="tracking-item">
-                                        <p>Order #<%= order.orderId %> - <%= order.firstname %> <%= order.lastname %></p>
-                                        <div class="progress-bar">
-                                            <% let progressWidth = 0; let statusText = ''; %>
-                                            <% if(order.status === 'pending'){ progressWidth = 25; statusText = 'Pending'; } %>
-                                            <% if(order.status === 'processing'){ progressWidth = 50; statusText = 'Processing'; } %>
-                                            <% if(order.status === 'out_for_delivery'){ progressWidth = 75; statusText = 'Out for Delivery'; } %>
-                                            <% if(order.status === 'delivered'){ progressWidth = 100; statusText = 'Delivered'; } %>
-                                            <div class="progress" style="width: <%= progressWidth %>%;"><%= statusText %></div>
+                            <div class="order-card" data-id="<%= order.orderId %>">
+
+                                <div class="order-top">
+                                    <div class="order-id">
+                                        Order #<%= order.orderId %>
+                                    </div>
+
+                                    <div class="order-status <%= order.status %>">
+                                        <%= order.status.replace(/_/g,' ').toUpperCase() %>
+                                    </div>
+                                </div>
+
+                                <div class="order-main">
+
+                                    <div class="customer-block">
+                                        <div class="customer-name">
+                                            <%= order.firstname %> <%= order.lastname %>
                                         </div>
 
-                                        <form action="/admin/order/delete/<%= order.orderId %>" 
-                                            method="POST"
-                                            class="delete-order-form"
-                                            onsubmit="return confirm('Are you sure you want to delete this order?');">
-                                            <button type="submit" class="delete-order-btn">
-                                                Delete
-                                            </button>
-                                        </form>
+                                        <div class="customer-email">
+                                            <%= order.email %>
+                                        </div>
 
-
+                                        <div class="customer-phone">
+                                            <%= order.phone || 'N/A' %>
+                                        </div>
                                     </div>
-                                <% }) %>
+
+                                    <div class="order-address">
+                                        <%= order.address %>, 
+                                        <%= order.city %>, 
+                                        <%= order.region %> 
+                                        <%= order.postal %>
+                                    </div>
+
+                                </div>
+
+                                <div class="order-summary">
+
+                                    <div class="summary-box">
+                                        <span>Total</span>
+                                        <strong>₱<%= Number(order.total_amount).toLocaleString() %></strong>
+                                    </div>
+
+                                    <div class="summary-box">
+                                        <span>Date</span>
+                                        <strong><%= new Date(order.created_at).toLocaleDateString() %></strong>
+                                    </div>
+
+                                </div>
+
+                                <div class="order-items">
+                                    <div class="items-title">Items Ordered</div>
+                                    <div class="items-list">
+                                        <%- order.items %>
+                                    </div>
+                                </div>
+
+                                <div class="order-actions">
+
+                                    <% if (order.status === 'pending') { %>
+                                    <button class="btn primary approve-btn">Approve</button>
+                                    <% } %>
+
+                                    <% if (order.status === 'processing') { %>
+                                    <button class="btn primary delivery-btn">Out for Delivery</button>
+                                    <% } %>
+
+                                    <% if (order.status === 'out_for_delivery') { %>
+                                    <button class="btn success delivered-btn">Mark Delivered</button>
+                                    <% } %>
+
+                                    <button class="btn danger reject-btn">Cancel</button>
+
+                                </div>
+
                             </div>
+
+                            <% }) %>
+
                         </div>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================= ORDER TRACKING ================= -->
+
+                <section class="section">
+
+                    <div class="tracking-card-wrapper">
+
+                        <div class="tracking-header">
+                            <h2>Order Tracking</h2>
+                            <p class="tracking-subtitle">Track current order progress</p>
+                        </div>
+
+                        <div class="tracking-container">
+
+                            <% allOrders.forEach(order => { %>
+
+                            <%
+                                let progressStep = 1;
+                                let statusText = "Pending";
+
+                                if(order.status === "pending"){ progressStep = 1; statusText = "Pending"; }
+                                if(order.status === "processing"){ progressStep = 2; statusText = "Processing"; }
+                                if(order.status === "out_for_delivery"){ progressStep = 3; statusText = "Out for Delivery"; }
+                                if(order.status === "delivered"){ progressStep = 4; statusText = "Delivered"; }
+                            %>
+
+                            <div class="tracking-card">
+
+                                <div class="tracking-top">
+
+                                    <div class="tracking-order">
+                                        Order #<%= order.orderId %>
+                                    </div>
+
+                                    <div class="tracking-customer">
+                                        <%= order.firstname %> <%= order.lastname %>
+                                    </div>
+
+                                    <div class="tracking-status <%= order.status %>">
+                                        <%= statusText %>
+                                    </div>
+
+                                </div>
+
+                                <div class="tracking-progress">
+
+                                    <div class="step <%= progressStep >= 1 ? 'active' : '' %>">
+                                        <span>Pending</span>
+                                    </div>
+
+                                    <div class="step <%= progressStep >= 2 ? 'active' : '' %>">
+                                        <span>Processing</span>
+                                    </div>
+
+                                    <div class="step <%= progressStep >= 3 ? 'active' : '' %>">
+                                        <span>Delivery</span>
+                                    </div>
+
+                                    <div class="step <%= progressStep >= 4 ? 'active' : '' %>">
+                                        <span>Delivered</span>
+                                    </div>
+
+                                </div>
+
+                                <form 
+                                    action="/admin/order/delete/<%= order.orderId %>" 
+                                    method="POST"
+                                    class="delete-order-form"
+                                    onsubmit="return confirm('Are you sure you want to delete this order?');"
+                                >
+
+                                    <button type="submit" class="delete-order-btn">
+                                        Delete Order
+                                    </button>
+
+                                </form>
+
+                                <button
+                                        class="btn view-details-btn"
+                                        data-id="<%= order.orderId %>">
+                                        View Details
+                                </button>
+
+                            </div>
+
+                            <% }) %>
+
+                        </div>
+
+                    </div>
 
                 </section>
 
@@ -285,104 +578,226 @@
 
                <!-- User Account Management -->
                 <section id="users" class="section">
-                    <h2>User Account Management</h2>
-                    <table class="user-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% users.forEach(user => { %>
-                                <tr data-id="<%= user.id %>">
-                                    <td><%= user.firstname %> <%= user.lastname %></td>
-                                    <td><%= user.email %></td>
-                                    <td>
-                                        <button class="edit-user-btn">Edit</button>
-                                        <button class="delete-user-btn">Delete</button>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                    <h3 style="margin-top:30px;">Create Admin Account</h3>
 
-                    <div class="admin-create-section">
-                        <h3>Create Admin Account</h3>
+                    <div class="users-card">
+
+                        <div class="users-header">
+                            <h2>User Account Management</h2>
+                            <p class="users-subtitle">
+                                Manage registered users and administrators
+                            </p>
+                        </div>
+
+                        <div class="users-scroll">
+
+                            <table class="user-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    <% users.forEach(user => { %>
+
+                                    <tr data-id="<%= user.id %>">
+
+                                        <td>
+                                            <%= user.firstname %> <%= user.lastname %>
+                                        </td>
+
+                                        <td>
+                                            <%= user.email %>
+                                        </td>
+
+                                        <td class="user-actions">
+                                            <button class="edit-user-btn">Edit</button>
+                                            <button class="delete-user-btn">Delete</button>
+                                        </td>
+
+                                    </tr>
+
+                                    <% }) %>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="admin-create-card">
+
+                        <div class="admin-create-header">
+                            <h3>Create Admin Account</h3>
+                            <p class="admin-create-subtitle">
+                                Add a new administrator to manage the dashboard
+                            </p>
+                        </div>
 
                         <div class="admin-create-form">
-                            <input type="text" id="newAdminName" placeholder="Display Name" required>
-                            <input type="email" id="newAdminEmail" placeholder="Email" required>
-                            <input type="password" id="newAdminPassword" placeholder="Password" required>
 
-                            <button id="createAdminBtn">Create Admin</button>
+                            <div class="form-group">
+                                <label for="newAdminName">Display Name</label>
+                                <input
+                                    type="text"
+                                    id="newAdminName"
+                                    placeholder="Enter display name"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="newAdminEmail">Email Address</label>
+                                <input
+                                    type="email"
+                                    id="newAdminEmail"
+                                    placeholder="Enter email address"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="newAdminPassword">Password</label>
+                                <input
+                                    type="password"
+                                    id="newAdminPassword"
+                                    placeholder="Enter secure password"
+                                    required
+                                >
+                            </div>
+
+                            <button
+                                id="createAdminBtn"
+                                class="admin-create-btn"
+                            >
+                                Create Admin
+                            </button>
+
                         </div>
+
                     </div>
+
                 </section>
 
                 <!-- Edit User Modal -->
-                <div id="editUserModal" class="modal" style="display:none;">
-                    <div class="modal-content">
-                        <span class="close">&times;</span>
-                        <h3>Edit User</h3>
-                        <form id="editUserForm">
-                            <input type="hidden" name="id" id="editUserId">
+               <div id="editUserModal" class="modal" style="display:none;">
 
-                            <div class="form-group">
-                                <label for="editFirstname">First Name</label>
-                                <input type="text" name="firstname" id="editFirstname" required>
-                            </div>
+                <div class="modal-content user-modal">
 
-                            <div class="form-group">
-                                <label for="editLastname">Last Name</label>
-                                <input type="text" name="lastname" id="editLastname" required>
-                            </div>
+                    <span class="close">&times;</span>
 
-                            <div class="form-group">
-                                <label for="editEmail">Email</label>
-                                <input type="email" name="email" id="editEmail" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="editPassword">Password <small>(leave blank to keep current)</small></label>
-                                <input type="password" name="password" id="editPassword" placeholder="New Password">
-                            </div>
-
-                            <div class="modal-actions">
-                                <button type="submit" class="save-btn">Save</button>
-                                <button type="button" class="cancel-btn">Cancel</button>
-                            </div>
-                        </form>
+                    <div class="modal-header">
+                        <h3>Edit User Account</h3>
+                        <p class="modal-subtitle">Update user information</p>
                     </div>
+
+                    <form id="editUserForm">
+
+                        <input type="hidden" name="id" id="editUserId">
+
+                        <div class="form-group">
+                            <label for="editFirstname">First Name</label>
+                            <input type="text" name="firstname" id="editFirstname" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editLastname">Last Name</label>
+                            <input type="text" name="lastname" id="editLastname" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editEmail">Email Address</label>
+                            <input type="email" name="email" id="editEmail" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="editPassword">
+                                Password <span class="hint">(leave blank to keep current)</span>
+                            </label>
+                            <input
+                                type="password"
+                                name="password"
+                                id="editPassword"
+                                placeholder="Enter new password"
+                            >
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="cancel-btn">Cancel</button>
+                            <button type="submit" class="save-btn">Save Changes</button>
+                        </div>
+
+                    </form>
+
                 </div>
 
-                <!-- SETTINGS SIDEBAR -->
-                <!-- Sidebar -->
+            </div>
+
                 <div id="settingsSidebar" class="settings-sidebar">
+
                     <div class="settings-header">
-                        <h3>Settings</h3>
+                        <h3>Account Settings</h3>
                         <span id="closeSettings">&times;</span>
                     </div>
 
-                    <div class="setting-item">
-                        <label>Display Name</label>
-                        <input type="text" id="adminDisplayName" name="displayName" value="<%= admin.display_name %>">
-                    </div>
-                    <div class="setting-item">
-                        <label>Password</label>
-                        <input type="password" id="adminPassword" name="password" placeholder="New Password">
-                    </div>
-                    <div class="setting-item">
-                        <button id="saveAdminSettings">Save Settings</button>
-                    </div>
-                </div>
+                    <div class="settings-body">
 
+                        <div class="setting-item">
+                            <label for="adminDisplayName">Display Name</label>
+                            <input
+                                type="text"
+                                id="adminDisplayName"
+                                name="displayName"
+                                value="<%= admin.display_name %>"
+                                placeholder="Enter display name"
+                            >
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="adminPassword">
+                                New Password
+                                <span class="hint">(leave blank to keep current)</span>
+                            </label>
+
+                            <input
+                                type="password"
+                                id="adminPassword"
+                                name="password"
+                                placeholder="Enter new password"
+                            >
+                        </div>
+
+                        <button id="saveAdminSettings" class="settings-save-btn">
+                            Save Changes
+                        </button>
+
+                    </div>
+
+                </div>
                 <!-- Overlay (moved outside sidebar) -->
                 <div id="settingsOverlay" class="settings-overlay"></div>
 
 
+                <div id="orderDetailsModal" class="modal">
+
+    <div class="modal-content order-details-modal">
+
+        <span id="closeOrderDetails" class="close">&times;</span>
+
+        <h3>Order Details</h3>
+
+        <div id="orderDetailsContent"></div>
+
+    </div>
+
+    </div>
     <!-- Toast Notification -->
     <div id="toast"></div>
         

@@ -65,7 +65,7 @@
                                 </div>
 
                                 <select id="region" name="region" required>
-                                    <option disabled selected>Select Region</option>
+                                    <option value="" disabled selected>Select Region</option>
                                     <option value="NCR">NCR (National Capital Region)</option>
                                     <option value="Region I">Region I – Ilocos Region</option>
                                     <option value="Region II">Region II – Cagayan Valley</option>
@@ -85,8 +85,6 @@
                                     <option value="CAR">CAR – Cordillera Administrative Region</option>
                                 </select>
 
-                                <input class="phone-input" type="text" name="phone" placeholder="Phone" required>
-
                             </div>
 
                             <p class="payment-text">Payment</p>
@@ -102,73 +100,68 @@
                                     <input type="radio" name="payment" value="Gcash">
                                     Gcash
                                 </label>
-
-                                <label class="payment-option">
-                                    <input type="radio" name="payment" value="Maya">
-                                    Maya
-                                </label>
-
-                                <label class="payment-option">
-                                    <input type="radio" name="payment" value="Bank Account">
-                                    Bank Account
-                                </label>
                             </div>
                         </div>
 
                         <div class="checkout2">
-                            <div class="payment-methods">
-                                <div class="order-container">
-                                    <p class="order-text">Order summary</p>
 
-                                    <div class="order-content">
-                                    <% cartItems.forEach(item => { %>
-                                        <div class="imageNameTotal-container">
-                                            <img
-                                            src="<%= item.image %>"
-                                            class="product-image"
-                                            alt="<%= item.name %>"
-                                            >
+                            <div class="order-card">
 
-                                            <p class="product-name"><%= item.name %></p>
-                                            <p class="product-value">₱<%= item.price.toLocaleString() %></p>
+                                <p class="order-title">Order Summary</p>
+
+                                <% cartItems.forEach(item => { %>
+
+                                    <div class="order-item">
+
+                                    <div class="order-left">
+                                        <img src="<%= item.image %>" class="product-image" alt="<%= item.name %>">
+
+                                        <div class="order-info">
+                                        <p class="product-name"><%= item.name %></p>
+
+                                        <p class="product-variant">
+                                            <%= item.kilograms ? item.kilograms + 'kg' : '' %>
+                                        </p>
+
+                                        <p class="product-qty">
+                                            Qty: <%= item.quantity %>
+                                        </p>
                                         </div>
-
-                                        <div class="kilograms-container">
-                                            <p class="product-kilograms-text">Kilograms</p>
-                                            <p class="product-kilograms"><%= item.kilograms || '' %></p>
-                                        </div>
-
-                                        <div class="subtotal-container">
-                                            <p class="product-subtotal-text">Subtotal</p>
-                                            <p class="product-subtotal">
-                                            ₱<%= (item.price * item.quantity).toLocaleString() %>
-                                            </p>
-                                        </div>
-                                        <% }) %>
-
-
-                                        <div class="subtotal-container">
-                                            <p class="product-subtotal-text">Subtotal</p>
-                                            <p>₱<%= subtotal.toLocaleString() %></p>
-                                        </div>
-
-                                        <div class="shipping-container">
-                                            <p class="product-shipping-text">Shipping Fee</p>
-                                            <p>₱<%= shipping.toLocaleString() %></p>
-                                        </div>
-
-                                        <div class="total-container">
-                                            <p class="product-total-text"><strong>Total</strong></p>
-                                            <p class="product-total">
-                                                <strong>₱<%= total.toLocaleString() %></strong>
-                                            </p>
-                                        </div>
-
-                                        <button type="submit" id="checkoutBtn">Complete order</button>
                                     </div>
+
+                                    <div class="order-right">
+                                        <span class="peso">₱</span>
+                                        <span class="price">
+                                        <%= (item.price * item.quantity).toLocaleString() %>
+                                        </span>
+                                    </div>
+
+                                    </div>
+
+                                <% }) %>
+
+                                <div class="order-divider"></div>
+
+                                <div class="order-row">
+                                <span>Subtotal</span>
+                                <span><span class="peso">₱</span><%= subtotal.toLocaleString() %></span>
                                 </div>
+
+                                <div class="order-row">
+                                <span>Shipping</span>
+                                <span><span class="peso">₱</span><%= shipping.toLocaleString() %></span>
+                                </div>
+
+                                <div class="order-total">
+                                <span>Total</span>
+                                <span><span class="peso">₱</span><%= total.toLocaleString() %></span>
+                                </div>
+
+                                <button type="submit" id="checkoutBtn">Complete Order</button>
+
                             </div>
-                        </div>
+
+                            </div>
 
                     </form>
                     <!-- ✅ FORM END -->

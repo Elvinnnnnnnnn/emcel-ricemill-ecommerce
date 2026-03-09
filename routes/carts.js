@@ -98,14 +98,60 @@ router.get('/', authController.isLoggedIn, (req, res) => {
 
 // Update quantity
 router.patch('/:id', authController.isLoggedIn, (req, res) => {
-  const { quantity } = req.body;
-  const cartId = req.params.id;
-  const sql = 'UPDATE cart_items SET quantity = ? WHERE id = ?';
-  db.query(sql, [quantity, cartId], (err) => {
-    if (err) return res.status(500).json({ success: false, error: err });
-    res.json({ success: true });
-  });
-});
+
+  const cartId = req.params.id
+  const { quantity } = req.body
+
+  const stockSql = `
+    SELECT pv.stock
+    FROM cart_items ci
+    JOIN product_variants pv ON ci.variant_id = pv.id
+    WHERE ci.id = ?
+  `
+
+  db.query(stockSql, [cartId], (err, result) => {
+
+    if (err || result.length === 0) {
+      return res.status(400).json({
+        success:false,
+        message:'Item not found'
+      })
+    }
+
+    const stock = result[0].stock
+
+    if (quantity > stock) {
+      return res.json({
+        success:false,
+        message:`Only ${stock} sacks available`,
+        available_stock:stock
+      })
+    }
+
+    const updateSql = `
+      UPDATE cart_items
+      SET quantity = ?
+      WHERE id = ?
+    `
+
+    db.query(updateSql, [quantity, cartId], (updateErr) => {
+
+      if (updateErr) {
+        return res.status(500).json({
+          success:false,
+          message:'Cart update failed'
+        })
+      }
+
+      res.json({
+        success:true
+      })
+
+    })
+
+  })
+
+})
 
 // Remove item
 router.delete('/:id', authController.isLoggedIn, (req, res) => {

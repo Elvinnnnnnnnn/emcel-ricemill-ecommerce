@@ -83,3 +83,75 @@ function showToast(message, type = 'success') {
   }, 2500);
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+
+  const cityInput = document.querySelector("input[name='city']");
+  const subtotalText = document.querySelector(".product-subtotal-text + p");
+  const shippingText = document.querySelector(".product-shipping-text + p");
+  const totalText = document.querySelector(".product-total strong");
+
+  if (!cityInput || !subtotalText || !shippingText || !totalText) return;
+
+  const subtotal = Number(
+    subtotalText.textContent.replace(/[₱,]/g, "")
+  );
+
+  function updateShipping() {
+
+    const city = cityInput.value.toLowerCase().trim();
+
+    let SHIPPING_FEE = 0;
+
+    if (
+      city.includes("morong") ||
+      city.includes("tanay") ||
+      city.includes("baras") ||
+      city.includes("binangonan") ||
+      city.includes("cardona") ||
+      city.includes("teresa") ||
+      city.includes("pililla") ||
+      city.includes("jalajala") ||
+      city.includes("rizal")
+    ) {
+      SHIPPING_FEE = 60;
+    }
+    else if (
+      city.includes("pasig") ||
+      city.includes("marikina") ||
+      city.includes("quezon city") ||
+      city.includes("manila") ||
+      city.includes("mandaluyong") ||
+      city.includes("taguig") ||
+      city.includes("makati")
+    ) {
+      SHIPPING_FEE = 100;
+    }
+    else if (
+      city.includes("bulacan") ||
+      city.includes("laguna") ||
+      city.includes("cavite")
+    ) {
+      SHIPPING_FEE = 140;
+    }
+    else if (
+      city.includes("ilocos") ||
+      city.includes("pangasinan") ||
+      city.includes("tarlac") ||
+      city.includes("bataan") ||
+      city.includes("zambales")
+    ) {
+      SHIPPING_FEE = 180;
+    }
+    else {
+      SHIPPING_FEE = 220;
+    }
+
+    const total = subtotal + SHIPPING_FEE;
+
+    shippingText.textContent = "₱" + SHIPPING_FEE.toLocaleString();
+    totalText.textContent = "₱" + total.toLocaleString();
+  }
+
+  cityInput.addEventListener("input", updateShipping);
+
+});

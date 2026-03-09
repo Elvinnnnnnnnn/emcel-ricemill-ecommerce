@@ -129,16 +129,40 @@ router.get('/dashboard', adminAuth.isAdminLoggedIn, (req, res) => {
 
 
     const pendingOrdersSql = `
-        SELECT 
-            o.id AS orderId,
-            o.total_amount,
-            o.status,
-            u.firstname,
-            u.lastname
-        FROM orders o
-        JOIN users u ON o.user_id = u.id
-        WHERE o.status IN ('pending', 'processing', 'out_for_delivery')
-        ORDER BY o.created_at DESC
+    SELECT 
+        o.id AS orderId,
+        o.total_amount,
+        o.status,
+        o.created_at,
+
+        u.firstname,
+        u.lastname,
+        u.email,
+
+        sd.phone,
+        sd.address,
+        sd.city,
+        sd.region,
+        sd.postal,
+
+        GROUP_CONCAT(
+            CONCAT(p.name,' (',v.kilograms,'kg) x',oi.quantity)
+            SEPARATOR '<br>'
+        ) AS items
+
+    FROM orders o
+
+    JOIN users u ON o.user_id = u.id
+    LEFT JOIN shipping_details sd ON sd.user_id = u.id
+
+    JOIN order_items oi ON oi.order_id = o.id
+    JOIN products p ON oi.product_id = p.id
+    LEFT JOIN product_variants v ON oi.variant_id = v.id
+
+    WHERE o.status IN ('pending','processing','out_for_delivery')
+
+    GROUP BY o.id
+    ORDER BY o.created_at DESC
     `;
 
 
@@ -683,15 +707,23 @@ router.post('/order/delivered/:id', adminAuth.isAdminLoggedIn, (req, res) => {
 
 // Reject Order
 router.post('/order/reject/:id', adminAuth.isAdminLoggedIn, (req, res) => {
+
     const sql = `
         UPDATE orders
         SET status = 'cancelled'
         WHERE id = ?
     `;
-    db.query(sql, [req.params.id], err => {
-        if (err) return res.status(500).send("Reject failed");
-        res.redirect('/admin/dashboard');
+
+    db.query(sql, [req.params.id], (err) => {
+
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ success:false });
+        }
+
+        res.json({ success:true });
     });
+
 });
 
 // Update order delivery info
@@ -866,6 +898,80 @@ router.post('/create-admin', adminAuth.isAdminLoggedIn, async (req, res) => {
     console.error(err);
     res.json({ success: false });
   }
+});
+
+router.get('/order/details/:id', adminAuth.isAdminLoggedIn, (req, res) => {
+
+    const orderId = req.params.id;
+
+    const orderSql = `
+        SELECT 
+            o.id,
+            o.payment,
+            o.total_amount,
+            o.shipping_fee,
+            o.status,
+            o.created_at,
+            o.estimated_delivery,
+
+            u.firstname,
+            u.lastname,
+            u.email,
+
+            sd.phone,
+            sd.address,
+            sd.city,
+            sd.region,
+            sd.postal
+
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        LEFT JOIN shipping_details sd ON sd.user_id = u.id
+
+        WHERE o.id = ?
+        LIMIT 1
+    `;
+
+    db.query(orderSql, [orderId], (err, orderResult) => {
+
+        if (err || orderResult.length === 0) {
+            return res.json({
+                success: false
+            });
+        }
+
+        const order = orderResult[0];
+
+        const itemsSql = `
+            SELECT 
+                p.name,
+                v.kilograms,
+                oi.quantity,
+                oi.price
+
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            LEFT JOIN product_variants v ON oi.variant_id = v.id
+
+            WHERE oi.order_id = ?
+        `;
+
+        db.query(itemsSql, [orderId], (itemsErr, itemsResult) => {
+
+            if (itemsErr) {
+                return res.json({ success:false });
+            }
+
+            res.json({
+                success: true,
+                order,
+                items: itemsResult
+            });
+
+        });
+
+    });
+
 });
 
 

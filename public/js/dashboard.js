@@ -1,37 +1,137 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    
     // ===== Sidebar Active Link =====
-    const navLinks = document.querySelectorAll(".sidebar a");
-    navLinks.forEach(link => {
-        link.addEventListener("click", () => {
-            navLinks.forEach(l => l.classList.remove("active"));
-            link.classList.add("active");
-        });
-    });
+    // ===== Sidebar Active Link =====
+const navLinks = document.querySelectorAll(".sidebar a")
 
+    navLinks.forEach(link => {
+
+    link.addEventListener("click", function(e) {
+
+    const targetId = this.getAttribute("href")
+
+    // ignore invalid or empty links
+        if (!targetId || targetId === "#") return
+
+        if (targetId.startsWith("#")) {
+
+     e.preventDefault()
+
+        const targetSection = document.querySelector(targetId)
+
+        if (targetSection) {
+            targetSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+            })
+        }
+
+        navLinks.forEach(l => l.classList.remove("active"))
+            this.classList.add("active")
+
+        }
+
+    })
+
+})
     // ===== Add Variant Button (ADD PRODUCT FORM) =====
     const addVariantBtn = document.getElementById('add-variant-btn');
     const addProductForm = document.getElementById('addProductForm');
 
     if (addVariantBtn && addProductForm) {
+
         addVariantBtn.addEventListener('click', () => {
+
             const variantRow = document.createElement('div');
+
             variantRow.classList.add('variant-row');
+
             variantRow.innerHTML = `
                 <input type="number" name="stock[]" placeholder="Stock" required>
                 <input type="number" name="price[]" placeholder="Price" required>
                 <input type="text" name="kilograms[]" placeholder="Kilograms (e.g. 25kg)" required>
                 <button type="button" class="remove-variant-btn">Remove</button>
-                <br>
             `;
 
-            addProductForm.insertBefore(variantRow, addVariantBtn);
+            const variantSection = addProductForm.querySelector('.variant-section');
+
+            variantSection.appendChild(variantRow);
 
             variantRow.querySelector('.remove-variant-btn').addEventListener('click', () => {
                 variantRow.remove();
             });
+
         });
+
     }
+
+const orderDetailsModal = document.getElementById("orderDetailsModal");
+const orderDetailsContent = document.getElementById("orderDetailsContent");
+const closeOrderDetails = document.getElementById("closeOrderDetails");
+
+document.addEventListener("click", async (e) => {
+
+const btn = e.target.closest(".view-details-btn");
+if (!btn) return;
+
+const orderId = btn.dataset.id;
+
+try {
+
+const res = await fetch(`/admin/order/details/${orderId}`);
+const data = await res.json();
+
+if (!data.success) {
+showToast("Failed to load order details","error");
+return;
+}
+
+const order = data.order;
+const items = data.items || [];
+
+const itemsHtml = items.map(item => `
+<div>
+${item.name} (${item.kilograms}kg) x${item.quantity}
+- ₱${Number(item.price).toLocaleString()}
+</div>
+`).join("");
+
+orderDetailsContent.innerHTML = `
+<p><strong>Customer:</strong> ${order.firstname} ${order.lastname}</p>
+
+<p><strong>Email:</strong> ${order.email}</p>
+
+<p><strong>Phone:</strong> ${order.phone || "N/A"}</p>
+
+<p>
+<strong>Address:</strong><br>
+${order.address}, ${order.city}, ${order.region}, ${order.postal}
+</p>
+
+<p><strong>Payment Method:</strong> ${order.payment}</p>
+
+<h4>Items Ordered</h4>
+
+${itemsHtml}
+
+<p>
+<strong>Total:</strong>
+₱${Number(order.total_amount).toLocaleString()}
+</p>
+`;
+
+orderDetailsModal.style.display = "flex";
+
+} catch (err) {
+showToast("Server error","error");
+}
+
+});
+
+closeOrderDetails.addEventListener("click", () => {
+orderDetailsModal.style.display = "none";
+});
 
     // ===== Delete Product =====
     document.querySelectorAll('.delete-btn').forEach(btn => {
@@ -114,9 +214,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // 1️⃣ Update product name
         await fetch(`/admin/product/edit/${productId}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
-            name: document.getElementById('productName').value
+                name: document.getElementById('productName').value,
+                description: document.getElementById('productDescription').value
             })
         });
 
@@ -432,7 +535,7 @@ document.addEventListener('click', async (e) => {
   if (!approveBtn && !deliveryBtn && !deliveredBtn && !rejectBtn) return;
 
   const btn = approveBtn || deliveryBtn || deliveredBtn || rejectBtn;
-  const orderItem = btn.closest('.order-item');
+  const orderItem = btn.closest('.order-card');
   const orderId = orderItem.dataset.id;
   const statusText = orderItem.querySelector('.status-text');
 
